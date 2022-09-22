@@ -1,0 +1,11 @@
+{
+	"luci-app-ddnsgo": {
+		"description": "Grant UCI access for luci-app-ddnsgo",
+		"read": {
+			"uci": [ "ddns-go" ]
+		},
+		"write": {
+			"uci": [ "ddns-go" ]
+		}
+	}
+}
