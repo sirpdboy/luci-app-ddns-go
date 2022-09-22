@@ -15,7 +15,6 @@ PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILE:=LICENSE
 PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/ddns-go
   SECTION:=multimedia
