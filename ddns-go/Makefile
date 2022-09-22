@@ -29,22 +29,22 @@ endef
 
 define Package/ddns-go/install
 	$(INSTALL_DIR) $(1)/usr/share/ddns-go
-	$(INSTALL_DATA)) ./files/ddns-go-default.yaml $(1)/usr/share/ddns-go
+	$(INSTALL_DATA)) ./file/ddns-go-default.yaml $(1)/usr/share/ddns-go
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./files/ddns-go.init $(1)/etc/init.d/ddns-go
+	$(INSTALL_BIN) ./file/ddns-go.init $(1)/etc/init.d/ddns-go
 	$(INSTALL_DIR) $(1)/usr/bin
 ifeq ($(ARCH),aarch64)
-	$(INSTALL_BIN) ./files/aarch64 $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/aarch64 $(1)/usr/bin/ddns-go
 else ifeq ($(ARCH),arm)
-	$(INSTALL_BIN) ./files/arm $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/arm $(1)/usr/bin/ddns-go
 else ifeq ($(ARCH),i386)
-	$(INSTALL_BIN) ./files/i386 $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/i386 $(1)/usr/bin/ddns-go
 else ifeq ($(ARCH),mips)
-	$(INSTALL_BIN) ./files/mips $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/mips $(1)/usr/bin/ddns-go
 else ifeq ($(ARCH),mipsel)
-	$(INSTALL_BIN) ./files/mipsel $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/mipsel $(1)/usr/bin/ddns-go
 else ifeq ($(ARCH),x86_64)
-	$(INSTALL_BIN) ./files/x86_64 $(1)/usr/bin/ddns-go
+	$(INSTALL_BIN) ./file/x86_64 $(1)/usr/bin/ddns-go
 endif
 endef
 
