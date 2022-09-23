@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-ddns-go 
+# Copyright (C) 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-ddnsgo 
 # 
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
@@ -29,7 +29,7 @@ endef
 
 define Package/ddns-go/install
 	$(INSTALL_DIR) $(1)/usr/share/ddns-go
-	$(INSTALL_DATA)) ./file/ddns-go-default.yaml $(1)/usr/share/ddns-go
+	$(INSTALL_DATA)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./file/ddns-go.init $(1)/etc/init.d/ddns-go
 	$(INSTALL_DIR) $(1)/usr/bin

@@ -13,7 +13,7 @@ USE_PROCD=1
 
 PROG=/usr/bin/ddns-go
 CONFDIR=/etc/ddns-go
-CONF=/etc/ddns-go/ddns-go-config.yaml
+CONF=/etc/ddns-go/ddnsgo-config.yaml
 
 get_config() {
         config_get_bool enabled $1 enabled 1
@@ -22,27 +22,27 @@ get_config() {
 
 
 inital_conf() {
-	config_load ddns-go
-        config_foreach get_config ddns-go
+	config_load ddnsgo
+        config_foreach get_config ddnsgo
 }
 
-ddns-go_prepare() {
-	# pgrep -f /usr/bin/ddns-go | xargs kill -9 >/dev/null 2>&1 
+ddnsgo_prepare() {
+	pgrep -f /usr/bin/ddns-go | xargs kill -9 >/dev/null 2>&1 
 	killall ddns-go 2>/dev/null
 }
 
 init_yaml(){
 	[ -d $CONFDIR ] || mkdir -p $CONFDIR 2>/dev/null
-	cat /usr/share/ddns-go/ddns-go-default.yaml  > $CONF
+	cat /usr/share/ddns-go/ddnsgo-default.yaml  > $CONF
 }
 
 stop_service() {
-	ddns-go_prepare
+	ddnsgo_prepare
 	logger -t ddns-go -p warn "ddns-go is stop."
 }
 
 start_service() {
-	ddns-go_prepare
+	ddnsgo_prepare
 	inital_conf
 	[ x$enabled == x1 ] || return 1
 	[ -s ${CONF} ] || init_yaml
