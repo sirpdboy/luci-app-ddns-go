@@ -18,22 +18,17 @@ PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-SECTION:=net
-CATEGORY:=Network
+  SECTION:=net
+  CATEGORY:=Network
   DEPENDS:=@(aarch64||arm||i386||mips||mipsel||x86_64)
   TITLE:=A plug-in DDNS-GO for luci-app-ddns-go by sirpdboy
   URL:=https://github.com/sirpdboy/luci-app-ddns-go
 endef
 
 define Package/$(PKG_NAME)/conffiles
-/etc/config/ddns-go
+/etc/config/ddnsgo
 endef
-define Package/$(PKG_NAME)/postinst
-#!/bin/sh
-if [ -z "$${IPKG_INSTROOT}" ]; then
-	[ -f /etc/uci-defaults/luci-ddns-go ] && /etc/uci-defaults/luci-ddns-go && rm -f /etc/uci-defaults/luci-ddns-go
-fi
-endef
+
 define Build/Compile
 endef
 

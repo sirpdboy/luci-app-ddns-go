@@ -22,7 +22,6 @@ get_config() {
 }
 ddnsgo_prepare() {
 	pgrep -f /usr/bin/ddns-go | xargs kill -9 >/dev/null 2>&1 
-	killall ddns-go 2>/dev/null
 }
 
 init_yaml(){
@@ -37,7 +36,6 @@ stop_service() {
 
 start_service() {
 	ddnsgo_prepare
-	
 	config_load ddnsgo
         config_foreach get_config ddnsgo
 	[ x$enabled == x1 ] || return 1
