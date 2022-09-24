@@ -9,7 +9,6 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 [![若部分图片无法正常显示，请挂上机场浏览或点这里到末尾看修复教程](https://visitor-badge.glitch.me/badge?page_id=sirpdboy-visitor-badge)](#解决-github-网页上图片显示失败的问题) [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 
 [luci-app-ddns-go  ddns-go动态域名插件](https://github.com/sirpdboy/luci-app-ddns-go)
-
 ======================
 
 
@@ -95,7 +94,6 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 -源码来源：https://github.com/sirpdboy/luci-app-ddns-go
 -你可以随意使用其中的源码，但请注明出处。
-
 ============================
 
 ## 界面
@@ -118,6 +116,9 @@ opentoks 主题: https://github.com/sirpdboy/luci-theme-opentoks [仿KOOLSAHRE�
 btmob 主题: https://github.com/sirpdboy/luci-theme-btmob
 
 系统高级设置 : https://github.com/sirpdboy/luci-app-advanced
+
+ddns-go动态域名: https://github.com/sirpdboy/luci-app-ddns-go
+
 
 ## 捐助
 
