@@ -34,7 +34,7 @@ endef
 
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/share/ddns-go $(1)/usr/bin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
-	$(INSTALL_CONF)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
+	$(INSTALL_DATA)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
 	$(INSTALL_BIN) ./file/$(PKG_ARCH)  $(1)/usr/bin/ddns-go
 	$(INSTALL_BIN) ./file/ddnsgo.init $(1)/etc/init.d/ddnsgo
 	$(INSTALL_CONF) ./file/ddnsgo.config $(1)/etc/config/ddnsgo
