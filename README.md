@@ -46,7 +46,8 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 - 支持TTL
 - 支持部分dns服务商传递自定义参数，实现地域解析等功能
 
-## 使用方法 [![](https://img.shields.io/badge/-编译使用方法-F5F5F5.svg)](#使用方法-)
+## 使用方法
+
 - 将luci-app-ddns-go添加至 LEDE/OpenWRT 源码的方法。
 
 ### 下载源码方法一：
@@ -90,7 +91,8 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
     make package/ddns-go/luci-app-ddns-go/compile V=s
  ```
 
-## 说明 [![](https://img.shields.io/badge/-说明-F5F5F5.svg)](#说明-)
+## 说明
+
 -源码来源：https://github.com/sirpdboy/luci-app-ddns-go
 -你可以随意使用其中的源码，但请注明出处。
 
@@ -117,7 +119,8 @@ btmob 主题: https://github.com/sirpdboy/luci-theme-btmob
 
 系统高级设置 : https://github.com/sirpdboy/luci-app-advanced
 
-## 捐助 [![](https://img.shields.io/badge/-捐助-F5F5F5.svg)](#捐助-) 
+## 捐助
+
 -如果你觉得此项目对你有帮助，请捐助我们，以使项目能持续发展，更加完善。··请作者喝杯咖啡~~~**
 -你们的支持就是我的动力！**
 
