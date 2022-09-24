@@ -25,6 +25,15 @@ CATEGORY:=Network
   URL:=https://github.com/sirpdboy/luci-app-ddns-go
 endef
 
+define Package/$(PKG_NAME)/conffiles
+/etc/config/ddns-go
+endef
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	[ -f /etc/uci-defaults/luci-ddns-go ] && /etc/uci-defaults/luci-ddns-go && rm -f /etc/uci-defaults/luci-ddns-go
+fi
+endef
 define Build/Compile
 endef
 
@@ -32,8 +41,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/share/ddns-go $(1)/usr/bin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
 	$(INSTALL_CONF)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
 	$(INSTALL_BIN) ./file/$(PKG_ARCH)  $(1)/usr/bin/ddns-go
-	$(INSTALL_BIN) ./file/ddns-go.init $(1)/etc/init.d/ddns-go
-	$(INSTALL_CONF) ./file/ddns-go.config $(1)/etc/config/ddns-go
+	$(INSTALL_BIN) ./file/ddnsgo.init $(1)/etc/init.d/ddnsgo
+	$(INSTALL_CONF) ./file/ddnsgo.config $(1)/etc/config/ddnsgo
 	$(INSTALL_BIN) ./file/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
 
 endef

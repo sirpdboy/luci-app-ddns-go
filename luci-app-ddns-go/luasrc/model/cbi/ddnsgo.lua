@@ -2,7 +2,7 @@
 
 local m, s
 
-local m = Map("ddns-go", translate("DDNS-GO"), translate("DDNS-GO automatically obtains your public IPv4 or IPv6 address and resolves it to the corresponding domain name service.")..translate("</br>For specific usage, see:")..translate("<a href=\'https://github.com/sirpdboy/luci-app-ddns-go.git' target=\'_blank\'>GitHub @sirpdboy/luci-app-ddns-go/a>") )
+local m = Map("ddnsgo", translate("DDNS-GO"), translate("DDNS-GO automatically obtains your public IPv4 or IPv6 address and resolves it to the corresponding domain name service.")..translate("</br>For specific usage, see:")..translate("<a href=\'https://github.com/sirpdboy/luci-app-ddns-go.git' target=\'_blank\'>GitHub @sirpdboy/luci-app-ddns-go/a>") )
 
 m:section(SimpleSection).template  = "ddnsgo_status"
 
@@ -21,7 +21,7 @@ o:depends("enabled",1)
 
 local e=luci.http.formvalue("cbi.apply")
 if e then
-  io.popen("/etc/init.d/ddns-go restart")
+  io.popen("/etc/init.d/ddnsgo restart")
 end
 
 return m

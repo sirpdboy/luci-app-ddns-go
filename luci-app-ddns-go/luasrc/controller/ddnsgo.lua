@@ -4,7 +4,7 @@
 module("luci.controller.ddnsgo", package.seeall)
 
 function index()
-	if not nixio.fs.access("/etc/config/ddns-go") then
+	if not nixio.fs.access("/etc/config/ddnsgo") then
 		return
 	end
 
@@ -16,7 +16,7 @@ end
 function ddnsgo_status()
 	local sys  = require "luci.sys"
 	local uci  = require "luci.model.uci".cursor()
-	local port = tonumber(uci:get_first("ddns-go", "ddnsgo", "port"))
+	local port = tonumber(uci:get_first("ddnsgo", "ddnsgo", "port"))
 
 	local e = {
 	 running = (sys.call("pidof ddns-go >/dev/null") == 0),
