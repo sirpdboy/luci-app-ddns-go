@@ -7,18 +7,19 @@
 
 include $(TOPDIR)/rules.mk
 
+PKG_ARCH:=$(ARCH)
 PKG_NAME:=ddns-go
 PKG_VERSION:=4.0.4
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_RELEASE:=$(PKG_ARCH)-1
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILE:=LICENSE
 PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 include $(INCLUDE_DIR)/package.mk
 
-define Package/ddns-go
-  SECTION:=multimedia
-  CATEGORY:=Multimedia
+define Package/$(PKG_NAME)
+SECTION:=net
+CATEGORY:=Network
   DEPENDS:=@(aarch64||arm||i386||mips||mipsel||x86_64)
   TITLE:=A plug-in DDNS-GO for luci-app-ddns-go by sirpdboy
   URL:=https://github.com/sirpdboy/luci-app-ddns-go
@@ -27,25 +28,14 @@ endef
 define Build/Compile
 endef
 
-define Package/ddns-go/install
-	$(INSTALL_DIR) $(1)/usr/share/ddns-go
-	$(INSTALL_DATA)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
-	$(INSTALL_DIR) $(1)/etc/init.d
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/share/ddns-go $(1)/usr/bin $(1)/etc/config $(1)/etc/init.d $(1)/etc/uci-defaults
+	$(INSTALL_CONF)) ./file/ddnsgo-default.yaml $(1)/usr/share/ddns-go/ddnsgo-default.yaml
+	$(INSTALL_BIN) ./file/$(PKG_ARCH)  $(1)/usr/bin/ddns-go
 	$(INSTALL_BIN) ./file/ddns-go.init $(1)/etc/init.d/ddns-go
-	$(INSTALL_DIR) $(1)/usr/bin
-ifeq ($(ARCH),aarch64)
-	$(INSTALL_BIN) ./file/aarch64 $(1)/usr/bin/ddns-go
-else ifeq ($(ARCH),arm)
-	$(INSTALL_BIN) ./file/arm $(1)/usr/bin/ddns-go
-else ifeq ($(ARCH),i386)
-	$(INSTALL_BIN) ./file/i386 $(1)/usr/bin/ddns-go
-else ifeq ($(ARCH),mips)
-	$(INSTALL_BIN) ./file/mips $(1)/usr/bin/ddns-go
-else ifeq ($(ARCH),mipsel)
-	$(INSTALL_BIN) ./file/mipsel $(1)/usr/bin/ddns-go
-else ifeq ($(ARCH),x86_64)
-	$(INSTALL_BIN) ./file/x86_64 $(1)/usr/bin/ddns-go
-endif
+	$(INSTALL_CONF) ./file/ddns-go.config $(1)/etc/config/ddns-go
+	$(INSTALL_BIN) ./file/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
+
 endef
 
-$(eval $(call BuildPackage,ddns-go))
+$(eval $(call BuildPackage,$(PKG_NAME)))

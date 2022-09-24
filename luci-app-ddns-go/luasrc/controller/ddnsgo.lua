@@ -16,10 +16,12 @@ end
 function ddnsgo_status()
 	local sys  = require "luci.sys"
 	local uci  = require "luci.model.uci".cursor()
+	local port = tonumber(uci:get_first("ddns-go", "ddnsgo", "port"))
 
-	local e = { }
-	e.running = luci.sys.call("pidof ddns-go >/dev/null") == 0
-	e.port = uci:get("ddns-go","ddnsgo","port")
+	local e = {
+	 running = (sys.call("pidof ddns-go >/dev/null") == 0),
+	 port = (port or 9876)
+	 }
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(e)
 end

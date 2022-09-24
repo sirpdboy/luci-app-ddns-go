@@ -1,6 +1,6 @@
 <script type="text/javascript">
 	//<![CDATA[
-	XHR.poll(3, '<%=url([[admin]], [[services]], [[ddnsgo]], [[ddnsgo_status]])%>', null,
+	XHR.poll(5, '<%=url([[admin]], [[services]], [[ddnsgo]], [[ddnsgo_status]])%>', null,
 		function(x, data) {
 			var tb = document.getElementById('ddnsgo_status');
 			if (data && tb)
