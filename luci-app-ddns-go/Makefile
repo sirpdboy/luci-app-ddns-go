@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-ddns-go
-PKG_VERSION:=1.0.4
+PKG_VERSION:=1.1.6
 PKG_RELEASE:=1
 
 LUCI_TITLE:=LuCI Support for Dynamic ddns-go Client

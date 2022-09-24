@@ -22,6 +22,7 @@ get_config() {
 }
 ddnsgo_prepare() {
 	pgrep -f /usr/bin/ddns-go | xargs kill -9 >/dev/null 2>&1 
+	logger -t ddns-go -p warn "ddns-go is stop."
 }
 
 init_yaml(){
@@ -31,12 +32,11 @@ init_yaml(){
 
 stop_service() {
 	ddnsgo_prepare
-	logger -t ddns-go -p warn "ddns-go is stop."
 }
 
 start_service() {
 	ddnsgo_prepare
-	config_load ddnsgo
+	config_load ddns-go
         config_foreach get_config ddnsgo
 	[ x$enabled == x1 ] || return 1
 	[ -s ${CONF} ] || init_yaml
