@@ -98,7 +98,11 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 ## 界面
 
-![screenshots](https://raw.githubusercontent.com/jeessy2/ddns-go/master/ddns-web.png)
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo1.jpg)
+
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo2.jpg)
+
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo3.jpg)
 
 
 # My other project
