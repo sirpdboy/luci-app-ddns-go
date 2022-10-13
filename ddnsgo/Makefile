@@ -7,7 +7,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ddnsgo
-PKG_VERSION:=4.0.4
+PKG_VERSION:=4.1.0
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -16,6 +16,7 @@ define Package/$(PKG_NAME)
   CATEGORY:=Multimedia
   DEPENDS:=@(aarch64||arm||i386||mips||mipsel||x86_64)
   TITLE:=A plug-in DDNS-GO by sirpdboy
+  URL:=https://github.com/sirpdboy/luci-app-ddns-go
   URL:=https://github.com/sirpdboy/luci-app-ddns-go
 endef
 
