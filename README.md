@@ -1,7 +1,7 @@
 ### 访问数：[![](https://visitor-badge.glitch.me/badge?page_id=sirpdboy-visitor-badge)] [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 
-欢迎来到sirpdboy的源码仓库！
-=
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明1.jpg)
+
 # luci-app-ddns-go
 
 luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对应的域名服务。支持的域名服务商 Alidns(阿里云) Dnspod(腾讯云) Cloudflare 华为云 Callback 百度云 porkbun GoDaddy
@@ -94,7 +94,8 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 -源码来源：https://github.com/sirpdboy/luci-app-ddns-go
 -你可以随意使用其中的源码，但请注明出处。
-============================
+
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明1.jpg)
 
 ## 界面
 
@@ -126,8 +127,7 @@ ddns-go动态域名: https://github.com/sirpdboy/luci-app-ddns-go
 
 ## 捐助
 
--如果你觉得此项目对你有帮助，请捐助我们，以使项目能持续发展，更加完善。··请作者喝杯咖啡~~~**
--你们的支持就是我的动力！**
+![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明1.jpg)
 
 |     <img src="https://img.shields.io/badge/-支付宝-F5F5F5.svg" href="#赞助支持本项目-" height="25" alt="图飞了😂"/>  |  <img src="https://img.shields.io/badge/-微信-F5F5F5.svg" height="25" alt="图飞了😂" href="#赞助支持本项目-"/>  | 
 | :-----------------: | :-------------: |
