@@ -49,24 +49,7 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 - 将luci-app-ddns-go添加至 LEDE/OpenWRT 源码的方法。
 
-### 下载源码方法一：
-- 编辑源码文件夹根目录feeds.conf.default并加入如下内容:
-
-```Brach
-
-    # feeds获取源码：
-	
-    src-git luci-app-ddns-go https://github.com/sirpdboy/luci-app-ddns-go
- ``` 
-  ```Brach
-  
-   # 更新feeds，并安装主题：
-   
-    scripts/feeds update luci-app-ddns-go
-	scripts/feeds install luci-app-ddns-go
- ``` 	
-
-### 下载源码方法二：
+### 下载源码方法:
 
  ```Brach
  
