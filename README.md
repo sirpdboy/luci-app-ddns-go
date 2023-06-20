@@ -77,6 +77,7 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 ## 说明
 
 -源码来源：https://github.com/sirpdboy/luci-app-ddns-go
+-源码来源：https://github.com/jeessy2/ddns-go.git
 -你可以随意使用其中的源码，但请注明出处。
 
 ![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明2.jpg)
