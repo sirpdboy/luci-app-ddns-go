@@ -1,4 +1,4 @@
--- Copyright (C) 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-ddns-go 
+-- Copyright (C) 2021-2022  sirpdboy  <herboy2008@gmail.com> https://github.com/sirpdboy/luci-app-ddns-go
 -- Licensed to the public under the Apache License 2.0.
 
 module("luci.controller.ddns-go", package.seeall)
@@ -16,8 +16,10 @@ end
 
 function act_status()
 	local sys  = require "luci.sys"
+	local port = tonumber(uci:get_first("ddns-go", "ddns-go", "port"))
 	local e = { }
 	e.running = sys.call("pidof ddns-go >/dev/null") == 0
+	e.port = (port or 9876)
 	luci.http.prepare_content("application/json")
 	luci.http.write_json(e)
 end

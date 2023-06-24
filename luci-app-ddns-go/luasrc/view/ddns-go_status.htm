@@ -6,7 +6,9 @@
 			{
 				if (data.running)
 				{
-					tb.innerHTML = '<em style=\"color:green\"><%:The DDNS-GO service is running.%></em><br/>';
+				var URL = ""+ window.location.protocol + "//" + window.location.hostname +":"+ data.port"";
+					tb.innerHTML = '<em><b style=\"color:green\"><%:The DDNS-GO service is running.%></b></em>';
+					tb.innerHTML +='<em> <br/><br/>' + ' <b > <%:Click the new page to open Lucky%>  <a href="' +URL+'"'+' target="_blank">' + URL + ' </a><br/> </em>';
 				}
 				else
 				{
