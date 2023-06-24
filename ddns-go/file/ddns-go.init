@@ -20,7 +20,7 @@ get_config() {
 	config_get_bool logger $1 logger 1
 	config_get port $1 port 9876
 }
-ddns-go_prepare() {
+prepare() {
 	pgrep -f /usr/bin/ddns-go | xargs kill -9 >/dev/null 2>&1 
 	logger -t ddns-go -p warn "ddns-go is stop."
 }
@@ -31,13 +31,13 @@ init_yaml(){
 }
 
 stop_service() {
-	ddns-go_prepare
+	prepare
 }
 
 start_service() {
-	ddns-go_prepare
+	prepare
 	config_load ddns-go
-        config_foreach get_config ddns-go
+        config_foreach get_config basic
 	[ x$enabled == x1 ] || return 1
 	[ -s ${CONF} ] || init_yaml
 	logger -t ddns-go -p warn "ddns-go is start."

@@ -8,7 +8,7 @@ m.description = translate("DDNS-GO automatically obtains your public IPv4 or IPv
 
 m:section(SimpleSection).template = "ddns-go_status"
 
-s = m:section(TypedSection, "ddns-go", translate("Global Settings"))
+s = m:section(TypedSection, "basic", translate("Global Settings"))
 s.addremove = false
 s.anonymous = true
 
