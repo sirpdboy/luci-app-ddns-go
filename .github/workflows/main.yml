@@ -54,11 +54,6 @@ jobs:
         with:
           name: ${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-
-      - name: Create compress files
-        run: |
-          tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
-
  
       - name: Upload packages
         uses: ncipollo/release-action@v1
@@ -67,4 +62,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
-          artifacts: "${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
