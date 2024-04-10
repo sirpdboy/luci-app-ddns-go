@@ -1,39 +1,54 @@
-name: Build packages
+name: Build
 
-on: workflow_dispatch
+on:
+  push:
+    tags:
+      - v1.**
 
 jobs:
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         arch:
-          - aarch64_generic    
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_generic
+          - arm_arm1176jzf-s_vfp
+          - arm_arm926ej-s
+          - arm_cortex-a15_neon-vfpv4
+          - arm_cortex-a5_vfpv4
+          - arm_cortex-a7
+          - arm_cortex-a7_neon-vfpv4
+          - arm_cortex-a8_vfpv3
+          - arm_cortex-a9
+          - arm_cortex-a9_neon
+          - arm_cortex-a9_vfpv3-d16
+          - arm_fa526
+          - arm_mpcore
+          - arm_xscale
+          - i386_pentium-mmx
           - i386_pentium4
+          - mips64_octeonplus
           - mips_24kc
+          - mips_4kec
+          - mips_mips32
+          - mipsel_24kc
+          - mipsel_24kc_24kf
+          - mipsel_74kc
+          - mipsel_mips32
           - x86_64
         sdk:
+          - openwrt-21.02
           - openwrt-22.03
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Init build dependencies
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          sudo swapoff -a
-          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo -E apt-get -qq update
-          sudo -E apt-get -qq install clang
-          latest_commit="$(curl -s https://api.github.com/repos/jeessy2/ddns-go/commits/main | jq -r '.sha' | cut -b 1-7)"
-          timestamp=$(curl -s https://api.github.com/repos/jeessy2/ddns-go/commits/main | jq -r '.commit.author.date')
-          formatted_timestamp=$(date --date="$timestamp" "+%Y-%m-%d")
-          echo "version=$formatted_timestamp-$latest_commit" >> "$GITHUB_ENV"
       - name: Building packages
         uses: sbwml/openwrt-gh-action-sdk@go1.22
         env:
@@ -48,13 +63,16 @@ jobs:
           name: ${{ matrix.arch }}
           path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
 
+      - name: Create compress files
+        run: |
+          tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
+
+ 
       - name: Upload packages
         uses: ncipollo/release-action@v1
         with:
-          name: ddns-go-${{ env.version }}
-          allowUpdates: true
-          tag: ddns-go-${{ env.version }}
-          commit: main
+          name: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
           replacesArtifacts: true
-          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
+          artifacts: "${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
