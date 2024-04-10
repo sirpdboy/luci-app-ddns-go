@@ -1,0 +1,60 @@
+name: Build packages
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - aarch64_generic    
+          - i386_pentium4
+          - mips_24kc
+          - x86_64
+        sdk:
+          - openwrt-22.03
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Init build dependencies
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo swapoff -a
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install clang
+          latest_commit="$(curl -s https://api.github.com/repos/jeessy2/ddns-go/commits/main | jq -r '.sha' | cut -b 1-7)"
+          timestamp=$(curl -s https://api.github.com/repos/jeessy2/ddns-go/commits/main | jq -r '.commit.author.date')
+          formatted_timestamp=$(date --date="$timestamp" "+%Y-%m-%d")
+          echo "version=$formatted_timestamp-$latest_commit" >> "$GITHUB_ENV"
+      - name: Building packages
+        uses: sbwml/openwrt-gh-action-sdk@go1.22
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
+          FEEDNAME: packages_ci
+          PACKAGES: luci-app-ddns-go
+          NO_REFRESH_CHECK: true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.arch }}
+          path: bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
+      - name: Upload packages
+        uses: ncipollo/release-action@v1
+        with:
+          name: ddns-go-${{ env.version }}
+          allowUpdates: true
+          tag: ddns-go-${{ env.version }}
+          commit: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+          replacesArtifacts: true
+          artifacts: "bin/packages/${{ matrix.arch }}/packages_ci/*.ipk"
