@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     tags:
-      - v6.**
+      - v**
 
 jobs:
   build:
@@ -13,7 +13,6 @@ jobs:
       fail-fast: false
       matrix:
         arch:
-          - x86_64
           - aarch64_cortex-a53
           - aarch64_cortex-a72
           - aarch64_generic
@@ -30,19 +29,27 @@ jobs:
           - arm_fa526
           - arm_mpcore
           - arm_xscale
+          - i386_pentium-mmx
           - i386_pentium4
+          - mips64_octeonplus
+          - mips_24kc
+          - mips_4kec
           - mips_mips32
+          - mipsel_24kc
+          - mipsel_24kc_24kf
+          - mipsel_74kc
           - mipsel_mips32
+          - x86_64
         sdk:
-          - openwrt-21.02
+          - openwrt-22.03
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Building packages
-        uses: sbwml/openwrt-gh-action-sdk@go1.22
+        uses: sbwml/openwrt-gh-action-sdk@go1.21
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
@@ -58,7 +65,6 @@ jobs:
       - name: Upload packages
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
