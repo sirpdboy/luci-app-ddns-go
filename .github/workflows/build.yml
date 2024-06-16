@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     tags:
-      - v6.**
+      - "*"
 
 jobs:
   build:
@@ -37,9 +37,7 @@ jobs:
           - i386_pentium-mmx
           - i386_pentium4
           - mips64_octeonplus
-          - mips_24kc
-          - mips_4kec
-          - mips_mips32
+          
         sdk:
           - openwrt-22.03
 
