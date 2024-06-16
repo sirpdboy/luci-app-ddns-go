@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     tags:
-      - v**
+      - v6.**
 
 jobs:
   build:
@@ -13,6 +13,11 @@ jobs:
       fail-fast: false
       matrix:
         arch:
+          - mipsel_24kc
+          - mipsel_24kc_24kf
+          - mipsel_74kc
+          - mipsel_mips32
+          - x86_64
           - aarch64_cortex-a53
           - aarch64_cortex-a72
           - aarch64_generic
@@ -35,11 +40,6 @@ jobs:
           - mips_24kc
           - mips_4kec
           - mips_mips32
-          - mipsel_24kc
-          - mipsel_24kc_24kf
-          - mipsel_74kc
-          - mipsel_mips32
-          - x86_64
         sdk:
           - openwrt-22.03
 
