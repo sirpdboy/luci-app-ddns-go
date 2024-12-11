@@ -3,9 +3,8 @@
 # Copyright (C) 2021-2023  sirpdboy  <herboy2008@gmail.com>
 # 
 # This is free software, licensed under the Apache License, Version 2.0 .
-#
-include $(TOPDIR)/rules.mk
 
+include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ddns-go
 PKG_VERSION:=6.7.7
