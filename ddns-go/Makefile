@@ -6,6 +6,7 @@
 #
 include $(TOPDIR)/rules.mk
 
+
 PKG_NAME:=ddns-go
 PKG_VERSION:=6.7.7
 PKG_RELEASE:=1
