@@ -3,7 +3,7 @@ name: Build packages
 on:
   push:
     tags:
-      - v*
+      - v6.**
 
 jobs:
   build:
@@ -14,7 +14,6 @@ jobs:
       matrix:
         arch:
           - aarch64_generic
-
           - mipsel_24kc
           - x86_64
 
