@@ -34,7 +34,7 @@
              "order": 30,
              "action": {
                "type": "view",
-               "path": "ddns-go/config"
+               "path": "ddns-go/log"
              }
     }
 
