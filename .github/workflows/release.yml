@@ -3,7 +3,7 @@ name: Build packages
 on:
   push:
     tags:
-      - v6.**
+      - v*
 
 jobs:
   build:
