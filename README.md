@@ -25,6 +25,7 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 <!-- TOC -->
 
 - [ddns-go](#ddns-go)
+  - [版本](# 版本说明)
   - [特性](#特性)
   - [使用方法](#使用方法)
   - [说明](#说明)
@@ -32,6 +33,14 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
   - [捐助](#捐助)
 
 <!-- /TOC -->
+
+## 版本说明
+
+## 2025.5.13  luci-app-ddns-go 5.0.2 
+- 更新日志：
+- 因为3和4我们这都不太喜欢，所直接上V5版本了。
+- 适配最新OPENWRT24.10，JS版本。老版18.06用LUA分支。
+
 
 ## 特性
 
@@ -86,11 +95,13 @@ luci-app-ddns-go 自动获得你的公网 IPv4 或 IPv6 地址，并解析到对
 
 ## 界面
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo1.jpg)
+![screenshots](./doc/ddnsgo1.png)
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo2.jpg)
+![screenshots](./doc/ddnsgo2.png)
 
-![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/ddnsgo3.jpg)
+![screenshots](./doc/ddnsgo3.png)
+
+![screenshots](./doc/ddnsgo4.png)
 
 
 
