@@ -1,4 +1,4 @@
-## 访问数：![hello](https://views.whatilearened.today/views/github/sirpdboy/deplives.svg)[![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
+## 访问数：![hello](https://views.whatilearened.today/views/github/sirpdboy/deplives.svg) [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
 
 <h1 align="center">
   <br>DDNS GO<br>
@@ -25,7 +25,7 @@
 <!-- TOC -->
 
 - [ddns-go](#ddns-go)
-  - [版本](# 版本说明)
+  - [版本](#版本说明)
   - [特性](#特性)
   - [使用方法](#使用方法)
   - [说明](#说明)
@@ -87,9 +87,9 @@
 
 ## 说明
 
--源码来源：https://github.com/sirpdboy/luci-app-ddns-go
--源码来源：https://github.com/jeessy2/ddns-go.git
--你可以随意使用其中的源码，但请注明出处。
+- 源码来源：https://github.com/sirpdboy/luci-app-ddns-go
+- 源码来源：https://github.com/jeessy2/ddns-go.git
+- 你可以随意使用其中的源码，但请注明出处。
 
 
 ## 使用与授权相关说明
@@ -127,4 +127,5 @@
 <a href="#readme">
     <img src="https://img.shields.io/badge/-返回顶部-orange.svg" alt="图飞了" title="返回顶部" align="right"/>
 </a>
-## 访问数：[![](https://visitor-badge-deno.deno.dev/sirpdboy.sirpdboy.svg)][![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
+
+## 访问数 ![](https://visitor-badge-deno.deno.dev/sirpdboy.sirpdboy.svg)  [![](https://img.shields.io/badge/TG群-点击加入-FFFFFF.svg)](https://t.me/joinchat/AAAAAEpRF88NfOK5vBXGBQ)
