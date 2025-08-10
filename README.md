@@ -31,7 +31,7 @@ Please read this page carefully, which includes precautions and instructions on 
 - Compatible with the latest OPENWRT24.10, JS version. The old version 18.06 uses LUA branch.
 
 
-## 特性
+## characteristic
 
 - Supports Mac, Windows, Linux systems, ARM, x86 architecture
 - Supported Domain Name Service Providers: AliDNS, Dnpod, Cloudflare, Huawei Cloud, callbacks, Baidu Cloud, porkbun, GoDaddy`
@@ -84,7 +84,8 @@ Edit the root directory of the source code folder 'feeds.comnf.defect' and add t
 
 ## describe
 
-Source code source：https://github.com/sirpdboy/luci-app-taskplan
+- Source code source：https://github.com/sirpdboy/luci-app-ddns-go
+- Source code source：https://github.com/jeessy2/ddns-go.git
 
 ![screenshots](https://raw.githubusercontent.com/sirpdboy/openwrt/master/doc/说明2.jpg)
 
