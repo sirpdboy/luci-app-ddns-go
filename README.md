@@ -31,7 +31,7 @@ Please read this page carefully, which includes precautions and instructions on 
 - Compatible with the latest OPENWRT24.10, JS version. The old version 18.06 uses LUA branch.
 
 
-## 特性
+## characteristic
 
 - Supports Mac, Windows, Linux systems, ARM, x86 architecture
 - Supported Domain Name Service Providers: AliDNS, Dnpod, Cloudflare, Huawei Cloud, callbacks, Baidu Cloud, porkbun, GoDaddy`
