@@ -47,7 +47,7 @@ async function checkProcess() {
 
 function getVersionInfo() {
     return L.resolveDefault(getDDNSGoInfo(), {}).then(function(result) {
-        console.log('getVersionInfo result:', result);
+        //console.log('getVersionInfo result:', result);
         return result || {};
     }).catch(function(error) {
         console.error('Failed to get version:', error);
