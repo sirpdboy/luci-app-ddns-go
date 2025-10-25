@@ -25,7 +25,14 @@ Please read this page carefully, which includes precautions and instructions on 
 
 ## release note
 
+## 2025.10.25  luci-app-ddns-go 1.6.3
+  1.Add version number check function
+  2.Add upgraded kernel functionality
+  3.Add the function of resetting user passwords
+  4.Kernel updated to 6.13.0
+
 ## 2025.5.14  luci-app-ddns-go 1.5.2
+
 ## 2025.5.12  luci-app-ddns-go 1.5.1
 - Update log:
 - Compatible with the latest OPENWRT24.10, JS version. The old version 18.06 uses LUA branch.
