@@ -26,10 +26,10 @@ Please read this page carefully, which includes precautions and instructions on 
 ## release note
 
 ## 2025.10.25  luci-app-ddns-go 1.6.3
-  1.Add version number check function
-  2.Add upgraded kernel functionality
-  3.Add the function of resetting user passwords
-  4.Kernel updated to 6.13.0
+ -   1.Add version number check function
+ -  2.Add upgraded kernel functionality
+ -  3.Add the function of resetting user passwords
+ -  4.Kernel updated to 6.13.0
 
 ## 2025.5.14  luci-app-ddns-go 1.5.2
 
