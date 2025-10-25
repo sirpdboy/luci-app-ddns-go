@@ -44,26 +44,16 @@ define Package/ddns-go/description
   support Alidns Dnspod Cloudflare Hicloud Callback Baiducloud porkbun GoDaddy Google Domains.
 endef
 
-define Package/$(PKG_NAME)/conffiles
-/etc/config/ddns-go
-/etc/ddns-go/ddns-go-config.yaml
-endef
 
 define Package/ddns-go/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_DIR) $(1)/etc/ddns-go
-	$(INSTALL_DIR) $(1)/usr/share/rpcd/ucode
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_DIR) $(1)/usr/libexec
-	$(INSTALL_CONF) $(CURDIR)/file/ddns-go.config $(1)/etc/config/ddns-go
 	$(INSTALL_BIN) $(CURDIR)/file/ddns-go.init $(1)/etc/init.d/ddns-go
+	$(INSTALL_DIR) $(1)/usr/libexec
 	$(INSTALL_BIN) $(CURDIR)/file/ddns-go-call.libexec $(1)/usr/libexec/ddns-go-call
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) $(CURDIR)/file/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
-	$(INSTALL_BIN) $(CURDIR)/file/luci.ddns-go.ucode $(1)/usr/share/rpcd/ucode/luci.ddns-go
-	$(INSTALL_CONF) $(CURDIR)/file/ddns-go-config.yaml.conf $(1)/etc/ddns-go/ddns-go-config.yaml
-	$(INSTALL_BIN) $(CURDIR)/file/localtime.bin $(1)/etc/ddns-go/localtime
+
 endef
 
 $(eval $(call GoBinPackage,ddns-go))
