@@ -52,7 +52,8 @@ return view.extend({
                 ]));
             } else {
                 var iframe = E('iframe', {
-                    src: window.location.protocol + '//' + window.location.hostname + ':' + port,
+                    // src: window.location.protocol + '//' + window.location.hostname + ':' + port,
+                    src: 'http://' + window.location.hostname + ':' + port,
                     style: 'width: 100%; min-height: 100vh; border: none;'
                 });
                 container.appendChild(iframe);
