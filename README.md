@@ -25,6 +25,11 @@ Please read this page carefully, which includes precautions and instructions on 
 
 ## release note
 
+## 2026.1.23  luci-app-ddns-go 1.6.5
+ - 1.Fixed the issue of being unable to obtain the IPv6 prefix. 
+ - 2.The logs are now sorted with the latest ones at the top.
+ - 3.Kernel updated to 6.15.0
+ 
 ## 2025.10.25  luci-app-ddns-go 1.6.3
  -   1.Add version number check function
  -  2.Add upgraded kernel functionality
