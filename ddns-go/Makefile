@@ -43,7 +43,6 @@ define Package/ddns-go/description
   ddns-go is a automatically obtain your public IPv4 or IPv6 address and resolve it to the corresponding domain name service,
   support Alidns Dnspod Cloudflare Hicloud Callback Baiducloud porkbun GoDaddy Google Domains.
 endef
-
 define Package/ddns-go/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 
@@ -61,6 +60,5 @@ define Package/ddns-go/conffiles
 /etc/config/ddns-go
 /etc/ddns-go/ddns-go-config.yaml
 endef
-
 $(eval $(call GoBinPackage,ddns-go))
 $(eval $(call BuildPackage,ddns-go))
