@@ -1,23 +1,23 @@
 # SPDX-License-Identifier: GPL-3.0-only
 #
-# Copyright (C) 2021-2025 sirpdboy  <herboy2008@gmail.com>
+# Copyright (C) 2021-2026 sirpdboy  <herboy2008@gmail.com>
 # 
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ddns-go
-PKG_VERSION:=6.12.5
-PKG_RELEASE:=31
+PKG_VERSION:=6.15.0
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/jeessy2/ddns-go/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=skip
+PKG_HASH:=f4443c44c7247fee49bfbd8e06b7c03b2f59cb99968e685b5655017cbd8dabf8
 
-
-PKG_LICENSE:=AGPL-3.0-only
+PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
-PKG_MAINTAINER:=herboy2008 <herboy2008@gmail.com>
+PKG_MAINTAINER:=sirpdboy  <herboy2008@gmail.com>
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
@@ -30,10 +30,10 @@ include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/ddns-go
+  TITLE:=A Linux web GUI client of ddns-go
   SECTION:=net
   CATEGORY:=Network
   SUBMENU:=Web Servers/Proxies
-  TITLE:=A Linux web GUI client of ddns-go
   URL:=https://github.com/jeessy2/ddns-go
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
   USERID:=ddns-go:ddns-go
@@ -48,11 +48,18 @@ define Package/ddns-go/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) $(CURDIR)/file/ddns-go.init $(1)/etc/init.d/ddns-go
+	$(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go
 	$(INSTALL_DIR) $(1)/usr/libexec
-	$(INSTALL_BIN) $(CURDIR)/file/ddns-go-call.libexec $(1)/usr/libexec/ddns-go-call
+	$(INSTALL_BIN) $(CURDIR)/files/ddns-go-call.libexec $(1)/usr/libexec/ddns-go-call
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) $(CURDIR)/file/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
+	$(INSTALL_BIN) $(CURDIR)/files/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
+	$(INSTALL_DIR) $(1)/etc/config/
+	$(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go
+endef
+
+define Package/ddns-go/conffiles
+/etc/config/ddns-go
+/etc/ddns-go/ddns-go-config.yaml
 endef
 
 $(eval $(call GoBinPackage,ddns-go))

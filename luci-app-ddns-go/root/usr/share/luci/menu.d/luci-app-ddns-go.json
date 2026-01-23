@@ -11,24 +11,23 @@
 		}
     },
 
+    "admin/services/ddns-go/ddns-go": {
+         "title": "DDNS-GO Control panel",
+         "order": 10,
+         "action": {
+               "type": "view",
+               "path": "ddns-go/ddns-go"
+             }
+    },
     "admin/services/ddns-go/config": {
              "title": "Base Setting",
-             "order": 10,
+             "order": 20,
              "action": {
                "type": "view",
                "path": "ddns-go/config"
              }
     },
 
-    "admin/services/ddns-go/ddns-go": {
-         "title": "DDNS-GO Control panel",
-         "order": 20,
-         "action": {
-               "type": "view",
-               "path": "ddns-go/ddns-go"
-             }
-    },
-    
     "admin/services/ddns-go/log": {
 		"title": "Log",
              "order": 30,
