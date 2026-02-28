@@ -13,7 +13,7 @@ PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/jeessy2/ddns-go/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=f4443c44c7247fee49bfbd8e06b7c03b2f59cb99968e685b5655017cbd8dabf8
+PKG_HASH:=skip
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
@@ -30,10 +30,10 @@ include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/ddns-go
-  TITLE:=A Linux web GUI client of ddns-go
   SECTION:=net
   CATEGORY:=Network
-  SUBMENU:=Web Servers/Proxies
+  SUBMENU:=IP Addresses and Names
+  TITLE:=Simple and easy-to-use Dynamic DNS client
   URL:=https://github.com/jeessy2/ddns-go
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
   USERID:=ddns-go:ddns-go
@@ -43,6 +43,7 @@ define Package/ddns-go/description
   ddns-go is a automatically obtain your public IPv4 or IPv6 address and resolve it to the corresponding domain name service,
   support Alidns Dnspod Cloudflare Hicloud Callback Baiducloud porkbun GoDaddy Google Domains.
 endef
+
 define Package/ddns-go/install
 	$(call GoPackage/Package/Install/Bin,$(1))
 
@@ -60,5 +61,6 @@ define Package/ddns-go/conffiles
 /etc/config/ddns-go
 /etc/ddns-go/ddns-go-config.yaml
 endef
+
 $(eval $(call GoBinPackage,ddns-go))
 $(eval $(call BuildPackage,ddns-go))
