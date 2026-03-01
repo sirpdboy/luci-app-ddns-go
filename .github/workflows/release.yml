@@ -47,13 +47,6 @@ jobs:
         with:
           fetch-depth: 0
 
-
-      - name: Build with Static Linking
-        run: |
-          sed -i '/golang-package/a \\tGO_PKG_DEFAULT_LDFLAGS:=-w -s -extldflags "-static"' mosdns/Makefile
-          sed -i '/golang-package/a \\tGO_PKG_DEFAULT_LDFLAGS:=-w -s -extldflags "-static"' v2dat/Makefile
-
-
       - name: Building packages
         uses: sbwml/openwrt-gh-action-sdk@go1.25
         env:
