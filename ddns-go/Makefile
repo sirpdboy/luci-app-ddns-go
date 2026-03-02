@@ -30,10 +30,10 @@ include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/ddns-go
+  TITLE:=A Linux web GUI client of ddns-go
   SECTION:=net
   CATEGORY:=Network
-  SUBMENU:=IP Addresses and Names
-  TITLE:=Simple and easy-to-use Dynamic DNS client
+  SUBMENU:=Web Servers/Proxies
   URL:=https://github.com/jeessy2/ddns-go
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
   USERID:=ddns-go:ddns-go
