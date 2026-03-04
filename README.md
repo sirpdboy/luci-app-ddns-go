@@ -3,13 +3,15 @@
 <h1 align="center">
   <br>DDNS GO<br>
 </h1>
-
-  <p align="center">
-
-  <a target="_blank" href="https://github.com/sirpdboy/luci-app-ddns-go/releases">
-    <img src="https://img.shields.io/github/release/sirpdboy/luci-app-ddns-go.svg?style=flat-square&label=ddns-go&colorB=green">
-  </a>
+<p align="center">
+<a href="https://openwrt.org"><img alt="OpenWrt" src="https://img.shields.io/badge/OpenWrt-%E2%89%A519.07-ff0000?logo=openwrt&logoColor=white"></a>
+<a href="https://www.google.com/chrome/"><img alt="Chrome" src="https://img.shields.io/badge/Chrome-%E2%89%A5111-4285F3?logo=googlechrome&logoColor=white"></a>
+<a href="https://www.apple.com/safari/"><img alt="Safari" src="https://img.shields.io/badge/Safari-%E2%89%A516.4-000000?logo=safari&logoColor=white"></a>
+<a href="https://www.mozilla.org/firefox/"><img alt="Firefox" src="https://img.shields.io/badge/Firefox-%E2%89%A5128-FF7138?logo=firefoxbrowser&logoColor=white"></a>
+<a target="_blank" href="https://github.com/sirpdboy/luci-app-ddns-go/releases"> <img alt="GitHub release" src="https://img.shields.io/github/v/release/sirpdboy/luci-app-ddns-go"></a>
+<a href="https://github.com/sirpdboy/luci-app-ddns-go/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/sirpdboy/luci-app-ddns-go/total"></a>
 </p>
+
 
 [中文](README_CN.md) | English
 
