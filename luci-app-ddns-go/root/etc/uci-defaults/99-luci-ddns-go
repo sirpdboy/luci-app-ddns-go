@@ -1,0 +1,8 @@
+#!/bin/sh
+
+echo "config basic 'config'" >/etc/config/ddns-go
+
+chmod +x /usr/libexec/ddns-go-call  /usr/share/rpcd/ucode/luci.ddns-go 2>/dev/null
+rm -f /tmp/luci-indexcache
+
+exit 0

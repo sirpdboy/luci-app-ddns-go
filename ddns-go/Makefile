@@ -1,10 +1,3 @@
-# SPDX-License-Identifier: GPL-3.0-only
-#
-# Copyright (C) 2021-2026 sirpdboy  <herboy2008@gmail.com>
-# 
-# This is free software, licensed under the Apache License, Version 2.0 .
-#
-
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ddns-go
@@ -27,20 +20,20 @@ GO_PKG:=github.com/jeessy2/ddns-go/v6
 GO_PKG_LDFLAGS_X:=main.version=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
-include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
+include ../../lang/golang/golang-package.mk
 
 define Package/ddns-go
-  TITLE:=A Linux web GUI client of ddns-go
+  TITLE:=Support IPV4 and IPV6 simple and easy-to-use IP binding domain name tool
   SECTION:=net
   CATEGORY:=Network
-  SUBMENU:=Web Servers/Proxies
+  SUBMENU:=IP Addresses and Names
   URL:=https://github.com/jeessy2/ddns-go
   DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
   USERID:=ddns-go:ddns-go
 endef
 
 define Package/ddns-go/description
-  ddns-go is a automatically obtain your public IPv4 or IPv6 address and resolve it to the corresponding domain name service,
+  A simple and easy-to-use IP binding domain name tool that supports IPV4 and IPV6,
   support Alidns Dnspod Cloudflare Hicloud Callback Baiducloud porkbun GoDaddy Google Domains.
 endef
 
@@ -49,10 +42,6 @@ define Package/ddns-go/install
 
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go
-	$(INSTALL_DIR) $(1)/usr/libexec
-	$(INSTALL_BIN) $(CURDIR)/files/ddns-go-call.libexec $(1)/usr/libexec/ddns-go-call
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) $(CURDIR)/files/luci-ddns-go.uci-default $(1)/etc/uci-defaults/luci-ddns-go
 	$(INSTALL_DIR) $(1)/etc/config/
 	$(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go
 endef
