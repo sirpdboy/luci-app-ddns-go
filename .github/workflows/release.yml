@@ -30,20 +30,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Prepare Makefile
-        run: |
-          if [ -f "ddns-go/Makefile" ]; then
-            echo "Adding static linking flags..."
-            sed -i '/define Package\/ddns-go\/install/i GO_PKG_DEFAULT_LDFLAGS:=-w -s -extldflags "-static"' ddns-go/Makefile
-          fi
-
+        with:
+          fetch-depth: 0
       - name: Build packages
         uses: sbwml/openwrt-gh-action-sdk@go1.25
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
           PACKAGES: luci-app-ddns-go
+          NO_REFRESH_CHECK: true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
