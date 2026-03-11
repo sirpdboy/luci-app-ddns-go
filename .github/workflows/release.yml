@@ -1,4 +1,4 @@
-name: Build packages
+name: Build ddns-go Packages
 
 on:
   workflow_dispatch:
@@ -18,49 +18,32 @@ jobs:
           - aarch64_cortex-a72
           - aarch64_cortex-a76
           - aarch64_generic
-          - arm_arm1176jzf-s_vfp
-          - arm_arm926ej-s
-          - arm_cortex-a15_neon-vfpv4
-          - arm_cortex-a5_vfpv4
           - arm_cortex-a7
-          - arm_cortex-a7_neon-vfpv4
-          - arm_cortex-a7_vfpv4
-          - arm_cortex-a8_vfpv3
           - arm_cortex-a9
-          - arm_cortex-a9_neon
-          - arm_cortex-a9_vfpv3-d16
-          - arm_fa526
-          - arm_xscale
-          - i386_pentium-mmx
-          - i386_pentium4
-          - loongarch64_generic
-          - mips64_mips64r2
-          - mips64_octeonplus
-          - mips64el_mips64r2
           - mips_24kc
-          - mips_4kec
-          - mips_mips32
           - mipsel_24kc
-          - mipsel_24kc_24kf
-          - mipsel_74kc
-          - mipsel_mips32
           - riscv64_riscv64
           - x86_64
         sdk:
           - openwrt-24.10
           - SNAPSHOT
+
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Building packages
+      - name: Prepare Makefile
+        run: |
+          if [ -f "ddns-go/Makefile" ]; then
+            echo "Adding static linking flags..."
+            sed -i '/define Package\/ddns-go\/install/i GO_PKG_DEFAULT_LDFLAGS:=-w -s -extldflags "-static"' ddns-go/Makefile
+          fi
+
+      - name: Build packages
         uses: sbwml/openwrt-gh-action-sdk@go1.25
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
           PACKAGES: luci-app-ddns-go
-          NO_REFRESH_CHECK: true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -70,15 +53,14 @@ jobs:
             bin/packages/${{ matrix.arch }}/packages_ci/*.apk
             bin/packages/riscv64_generic/packages_ci/*.apk
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
-      - name: Create compress files
-        continue-on-error: true
+      - name: Create release archive
         run: |
           if [ "${{ matrix.arch }}" = "riscv64_riscv64" ] && [ "${{ matrix.sdk }}" = "SNAPSHOT" ]; then
             tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/riscv64_generic/ packages_ci
           else
             tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
           fi
-      - name: Upload packages
+      - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
           name: ${{ github.ref_name }}
