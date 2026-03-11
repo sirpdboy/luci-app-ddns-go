@@ -20,7 +20,7 @@ PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=github.com/jeessy2/ddns-go/v6
 GO_PKG_LDFLAGS:=-w -s
@@ -35,7 +35,8 @@ define Package/ddns-go
   SUBMENU:=IP Addresses and Names
   TITLE:=Support IPV4 and IPV6 simple and easy-to-use IP binding domain name tool
   URL:=https://github.com/jeessy2/ddns-go
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-certificates
+  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
+  USERID:=ddns-go:ddns-go
 endef
 
 define Package/ddns-go/description
