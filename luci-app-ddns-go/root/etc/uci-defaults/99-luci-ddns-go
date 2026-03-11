@@ -2,7 +2,9 @@
 
 echo "config basic 'config'" >/etc/config/ddns-go
 
-chmod +x /usr/libexec/ddns-go-call  /usr/share/rpcd/ucode/luci.ddns-go 2>/dev/null
+chmod +x /usr/share/rpcd/ucode/luci.ddns-go
+chown root:www-data /usr/libexec/ddns-go-call
+chmod 750 /usr/libexec/ddns-go-call
 rm -f /tmp/luci-indexcache
 
 exit 0

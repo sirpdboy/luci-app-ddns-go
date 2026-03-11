@@ -13,22 +13,7 @@
 return view.extend({
 	render: function () {
 		var css = `
-			#log_textarea pre {
-				padding: 10px;
-				border-bottom: 1px solid #ddd;
-				font-size: small;
-				line-height: 1.3;
-				white-space: pre-wrap;
-				word-wrap: break-word;
-				overflow-y: auto;
-			}
-			.cbi-section small {
-				margin-left: 1rem;
-				font-size: small; 
-			}
 			.log-container {
-				display: flex;
-				flex-direction: column;
 				max-height: 1200px;
 				overflow-y: auto;
 				border-radius: 3px;
@@ -67,20 +52,15 @@ return view.extend({
 				display: flex;
 				gap: 5px;
 			}
-			.debug-info {
-				margin-top: 5px;
-				color: #666;
-				font-size: 11px;
-			}
+
 		`;
 
-		var log_container = E('div', { 'class': 'log-container', 'id': 'log_container' },
-			E('img', {
-				'src': L.resource(['icons/loading.gif']),
-				'alt': _('Loading...'),
-				'style': 'vertical-align:middle'
-			}, _('Collecting data ...'))
-		);
+		var log_container = E('div', { 
+			'class': 'log-container', 
+			'id': 'log_container',
+			'style': 'min-height: 200px;'
+		}, E('div', { 'class': 'log-line' }, _('Loading logs...')));
+
 
 		var lastLogContent = '';
 		var lastScrollTop = 0;
@@ -89,13 +69,24 @@ return view.extend({
 		function extractDDNSGoMessage(line) {
 			if (!line || !line.includes('ddns-go')) return null;
 			
-			var regex = /^.*?ddns-go\[\d+\]:\s*(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2})\s*(.*)$/;
+			var regex = /^(.*?ddns-go.*?):\s*(.*)$/;
 			var match = line.match(regex);
 			
 			if (match) {
+				var timestampMatch = line.match(/^([A-Z][a-z]{2}\s+[A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\d{4})/);
+				if (timestampMatch) {
+					return {
+						timestamp: timestampMatch[1],
+						message: match[2]
+					};
+				}
+			}
+			
+			var selfTimestampMatch = line.match(/(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})\s+(.*)$/);
+			if (selfTimestampMatch) {
 				return {
-					timestamp: match[1],
-					message: match[2]
+					timestamp: selfTimestampMatch[1],
+					message: selfTimestampMatch[2]
 				};
 			}
 			
@@ -110,28 +101,24 @@ return view.extend({
 			
 			var extracted = extractDDNSGoMessage(line);
 			if (!extracted) return null;
+			
 			var lineClass = ['log-line'];
 			
-			if (line.includes('err') || line.includes('ERROR')) {
+			if (line.includes('err') || line.includes('ERROR') || line.includes('failed')) {
 				lineClass.push('log-error');
 			} else if (line.includes('warn') || line.includes('WARNING')) {
 				lineClass.push('log-warning');
 			}
 			
 			if (extracted.timestamp) {
-				var timestampSpan = E('span', { 
-					'class': 'log-timestamp',
-					'title': extracted.timestamp
-				}, extracted.timestamp + ' ');
-				
-				var messageSpan = E('span', { 'class': 'log-message' }, extracted.message);
-				
-				return E('div', { 'class': lineClass.join(' ') }, [timestampSpan, messageSpan]);
+				return E('div', { 'class': lineClass.join(' ') }, [
+					E('span', { 'class': 'log-timestamp' }, extracted.timestamp + ' '),
+					E('span', { 'class': 'log-message' }, extracted.message)
+				]);
 			} else {
 				return E('div', { 'class': lineClass.join(' ') }, extracted.message);
 			}
 		}
-
 		function formatLogContent(logContent) {
 			if (!logContent || logContent.trim() === '') {
 				return E('div', { 'class': 'log-line' }, _('No ddns-go logs found.'));
@@ -142,7 +129,7 @@ return view.extend({
 			
 			for (var i = 0; i < lines.length; i++) {
 				var line = lines[i].trim();
-				if (line === '') continue;
+				if (line === '' || line.includes('No ddns-go logs found')) continue;
 				
 				var formattedLine = formatLogLine(line);
 				if (formattedLine) {
@@ -161,44 +148,49 @@ return view.extend({
 
 		function clearLogs(button) {
 			button.disabled = true;
-			button.textContent = _('Clear Logs');
+			button.textContent = _('Clearing...');
 			
-			fs.exec('/usr/libexec/ddns-go-call', ['clear_logs'])
+			return fs.exec('/usr/libexec/ddns-go-call', ['clear_logs'])
 				.then(function(res) {
 					button.textContent = _('Logs cleared!');
 					lastLogContent = '';
-					
 					return fetchLogs();
 				})
-				.then(function() {
+				.catch(function(err) {
+					console.error('Clear logs error:', err);
+					button.textContent = _('Failed to clear');
+				})
+				.finally(function() {
 					setTimeout(function() {
 						button.disabled = false;
 						button.textContent = _('Clear Logs');
 					}, 2000);
-				})
-				.catch(function(err) {
-					button.textContent = _('Failed: ') + (err.message || 'Unknown error');
-					setTimeout(function() {
-						button.disabled = false;
-						button.textContent = _('Clear Logs');
-					}, 3000);
 				});
 		}
-
 		function fetchLogs() {
+			
 			return fs.exec('/usr/libexec/ddns-go-call', ['get_logs'])
 				.then(function(res) {
 					var logContent = '';
-					if (res && typeof res === 'object') {
-						logContent = res.stdout || res.data || '';
+					if (res === null || res === undefined) {
+						logContent = '';
 					} else if (typeof res === 'string') {
 						logContent = res;
+					} else if (res.stdout !== undefined) {
+						logContent = res.stdout;
+					} else if (res.data !== undefined) {
+						logContent = res.data;
+					} else if (typeof res === 'object') {
+						logContent = JSON.stringify(res);
 					}
-					var lineCount = logContent.split('\n').filter(function(l) { 
-						return l.trim() !== '' && !l.includes('No ddns-go logs found'); 
-					}).length;
+					
+					logContent = logContent.trim();
+					var lineCount = logContent.split('\n').filter(l => 
+						l.trim() !== '' && !l.includes('No ddns-go logs found')
+					).length;
 					
 					if (logContent !== lastLogContent) {
+						
 						var formattedLog = formatLogContent(logContent);
 						
 						var prevScrollHeight = log_container.scrollHeight;
@@ -238,11 +230,7 @@ return view.extend({
 			isScrolledToTop = this.scrollTop <= 1;
 		});
 
-		setTimeout(function() {
-			fetchLogs().catch(function(err) {
-				console.error('Initial fetch error:', err);
-			});
-		}, 100);
+		setTimeout(fetchLogs, 200);
 
 		poll.add(L.bind(function() {
 			return fetchLogs().catch(function(err) {
@@ -255,11 +243,10 @@ return view.extend({
 		return E('div', { 'class': 'cbi-map' }, [
 			E('style', [css]),
 			E('div', { 'class': 'cbi-section' }, [
-				E('div', { 'class': 'control-buttons' }, [clear_button]),
+				E('div', { 'class': 'control-buttons' }, [ clear_button]),
 				log_container,
 				E('small', {}, [
 					_('Refresh every 5 seconds.').format(L.env.pollinterval),
-
 				])
 			])
 		]);

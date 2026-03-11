@@ -1,18 +1,10 @@
-# SPDX-License-Identifier: GPL-2.0-only
-#
-# Copyright (C) 2022-2026  sirpdboy  <herboy2008@gmail.com>
- #!/bin/sh
-
+#!/bin/sh
 case "$1" in
     "get_logs")
-        logread -l 200 | grep ddns-go || echo "No ddns-go logs found"
+        logread -l 200 2>/dev/null | grep ddns-go || echo "No ddns-go logs found"
         ;;
     "clear_logs")
-        /etc/init.d/log restart
+        /etc/init.d/log restart >/dev/null 2>&1
         echo "Logs cleared"
-        ;;
-    *)
-        echo "Usage: $0 {get_logs|clear_logs}"
-        exit 1
         ;;
 esac

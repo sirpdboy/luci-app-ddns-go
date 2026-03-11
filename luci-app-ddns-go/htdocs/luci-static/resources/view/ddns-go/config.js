@@ -28,6 +28,7 @@ const updateMessageMap = {
     'Update check failed': _('Update check failed'),
     'Update status unknown': _('Update status unknown')
 };
+
 async function checkProcess() {
     try {
         const pidofRes = await fs.exec('/bin/pidof', ['ddns-go']);
@@ -67,6 +68,14 @@ function checkUpdateStatus() {
         console.error('Failed to get update info:', error);
         return {};
     });
+}
+function extractPortNumber(portValue) {
+    if (!portValue) return '9876';
+    if (portValue.includes(':')) {
+        var parts = portValue.split(':');
+        return parts[parts.length - 1];
+    }
+    return portValue;
 }
 
 function renderStatus(isRunning, listen_port, noweb, version) {
@@ -118,13 +127,13 @@ function renderUpdateStatus(updateInfo) {
     }
 }
 
-
 return view.extend({
     load: function() {
         return Promise.all([
             uci.load('ddns-go')
         ]);
     },
+    
     handleResetPassword: async function () {
         try {
             ui.showModal(_('Resetting Password'), [
@@ -208,55 +217,56 @@ return view.extend({
         }
     },
 
-handleUpdate: async function () {
-    try {
-        var updateView = document.getElementById('update_status');
-        if (updateView) {
-            updateView.innerHTML = '<span class="spinning"></span> ' + _('Updating, please wait...');
-        }
-        const updateInfo = await checkUpdateStatus();
-        if (updateView) {
-            updateView.innerHTML = renderUpdateStatus(updateInfo);
-        }
-
-        if (updateInfo.update_successful || updateInfo.status === 'updated') {
-            if (window.statusPoll) {
-                window.statusPoll();
+    handleUpdate: async function () {
+        try {
+            var updateView = document.getElementById('update_status');
+            if (updateView) {
+                updateView.innerHTML = '<span class="spinning"></span> ' + _('Updating, please wait...');
             }
-            
-            setTimeout(() => {
-                var updateView = document.getElementById('update_status');
-                if (updateView) {
+            const updateInfo = await checkUpdateStatus();
+            if (updateView) {
+                updateView.innerHTML = renderUpdateStatus(updateInfo);
+            }
+
+            if (updateInfo.update_successful || updateInfo.status === 'updated') {
+                if (window.statusPoll) {
+                    window.statusPoll();
+                }
+                
+                setTimeout(() => {
+                    var updateView = document.getElementById('update_status');
+                    if (updateView) {
+                        getVersionInfo().then(function(versionInfo) {
+                            var version = versionInfo.version || '';
+                            updateView.innerHTML = String.format('<span style="color:green">✓ %s v%s</span>', 
+                                _('Current Version'), version);
+                        });
+                    }
+                }, 3000);
+            }
+
+        } catch (error) {
+            console.error('Update failed:', error);
+            var updateView = document.getElementById('update_status');
+            if (updateView) {
+                updateView.innerHTML = '<span style="color:red">✗ ' + _('Update failed') + '</span>';
+
+                setTimeout(() => {
                     getVersionInfo().then(function(versionInfo) {
                         var version = versionInfo.version || '';
-                        updateView.innerHTML = String.format('<span style="color:green">✓ %s v%s</span>', 
-                            _('Current Version:'), version);
+                        updateView.innerHTML = String.format('<span>%s v%s</span>', 
+                            _('Current Version'), version);
                     });
-                }
-            }, 3000);
+                }, 5000);
+            }
         }
-
-    } catch (error) {
-        console.error('Update failed:', error);
-        var updateView = document.getElementById('update_status');
-        if (updateView) {
-            updateView.innerHTML = '<span style="color:red">✗ ' + _('Update failed') + '</span>';
-
-            setTimeout(() => {
-                getVersionInfo().then(function(versionInfo) {
-                    var version = versionInfo.version || '';
-                    updateView.innerHTML = String.format('<span>%s v%s</span>', 
-                        _('Current Version:'), version);
-                });
-            }, 5000);
-        }
-    }
-},
-
+    },
     
     render: function(data) {
         var m, s, o;
-        var listen_port = (uci.get('ddns-go', 'config', 'port') || '[::]:9876').split(':').slice(-1)[0];
+        
+        var portValue = uci.get('ddns-go', 'config', 'port') || '[::]:9876';
+        var listen_port = extractPortNumber(portValue);
         var noweb = uci.get('ddns-go', 'config', 'noweb') || '0';
 
         m = new form.Map('ddns-go', _('DDNS-GO'),
@@ -283,7 +293,8 @@ handleUpdate: async function () {
                 });
             };
             
-            var pollInterval = poll.add(window.statusPoll, 5); 
+            poll.add(window.statusPoll, 5);
+            
             return E('div', { class: 'cbi-section', id: 'status_bar' }, [
                 statusView
             ]);
@@ -296,17 +307,25 @@ handleUpdate: async function () {
         o.rmempty = false;
 
         o = s.option(form.Value, 'port', _('Listen port'));
-        o.default = '[::]:9876';
+        o.default = '9876';
         o.rmempty = false;
+        o.datatype = 'string'; 
+        o.description = _('Port number (1-65535)');
 
-        o = s.option(form.Value, 'time', _('Update interval(seconds)'));
+        o = s.option(form.Value, 'time', _('Update interval (seconds)'));
         o.default = '300';
+        o.datatype = 'range(60,86400)'; 
+        o.description = _('Update interval in seconds (60-86400)');
 
-        o = s.option(form.Value, 'ctimes', _('Compare with service provider N times intervals'));
+        o = s.option(form.Value, 'ctimes', _('Provider comparison interval'));
         o.default = '5';
+        o.datatype = 'range(1,60)';
+        o.description = _('Number of times to compare with service provider (1-60)');
 
         o = s.option(form.Value, 'skipverify', _('Skip verifying certificates'));
         o.default = '0';
+        o.value('0', _('No'));
+        o.value('1', _('Yes'));
 
         o = s.option(form.Value, 'dns', _('Specify DNS resolution server'));
         o.value('223.5.5.5', _('Ali DNS 223.5.5.5'));
@@ -329,8 +348,8 @@ handleUpdate: async function () {
         o.inputstyle = 'apply';
         o.onclick = L.bind(this.handleResetPassword, this, data);
 
-        o = s.option(form.Button, '_update', _('Update kernel'));
-        o.inputtitle = _('Check Update');
+        o = s.option(form.Button, '_update', _('Check update'));
+        o.inputtitle = _('Check');
         o.inputstyle = 'apply';
         o.onclick = L.bind(this.handleUpdate, this, data);
 

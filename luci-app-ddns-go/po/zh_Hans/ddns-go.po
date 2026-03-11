@@ -27,8 +27,11 @@ msgstr "DDNS-GO操作台"
 msgid "Update interval(seconds)"
 msgstr "更新间隔（秒）"
 
-msgid "Compare with service provider N times intervals"
-msgstr "与服务提供商比较N次间隔"
+msgid "Provider comparison interval"
+msgstr "提供商比较间隔"
+
+msgid "Number of times to compare with service provider (1-60)"
+msgstr "与服务提供商间隔比较的次数（1-60）"
 
 msgid "Skip verifying certificates"
 msgstr "跳过证书验证"
@@ -48,8 +51,17 @@ msgstr "重置账户密码"
 msgid "Check Update"
 msgstr "检查更新"
 
-msgid "Current Version:"
-msgstr "当前版本:"
+msgid "Port number (1-65535)"
+msgstr "端口范围(1-65535)"
+
+msgid "Check"
+msgstr "检查"
+
+msgid "Update interval in seconds (60-86400)"
+msgstr "更新间隔范围(60-86400)秒"
+
+msgid "Current Version"
+msgstr "当前版本"
 
 msgid "Reset"
 msgstr "重置"
