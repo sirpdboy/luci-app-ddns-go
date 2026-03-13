@@ -90,6 +90,8 @@ jobs:
           echo "" >> release-notes.md
           echo "- **ddns-go Version**: \`$VERSION\`" >> release-notes.md
           echo "- **luci-app-ddns-go Package Version**: \`v1.6.7\`" >> release-notes.md
+          echo "- **OPENWRT 24.10 is an :**: \`IPK package\`" >> release-notes.md
+          echo "- **SNAPSHOT is an :**: \`APK package\`" >> release-notes.md
           echo "- **Release Date**: \`$(date +%Y-%m-%d)\`" >> release-notes.md
           echo "" >> release-notes.md
 
@@ -111,14 +113,6 @@ jobs:
           echo '```' >> release-notes.md
           echo "" >> release-notes.md
           
-          echo "## ✨ What's New" >> release-notes.md
-          echo "" >> release-notes.md
-          echo "根据官方更新日志， $VERSION 包含以下更新：" >> release-notes.md
-          echo "" >> release-notes.md
-          echo "- 🔧 支持更多的DNS服务商" >> release-notes.md
-          echo "- 🚀 性能优化和改进" >> release-notes.md
-          echo "- 🐛 Bug修复和稳定性提升" >> release-notes.md
-          echo "- 🌐 Web界面优化" >> release-notes.md
           echo "" >> release-notes.md
           echo "## 📋 Changelog" >> release-notes.md
           echo "" >> release-notes.md
