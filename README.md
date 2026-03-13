@@ -23,8 +23,12 @@ Please read this page carefully, which includes precautions and instructions on 
 ### Ddns go dynamic domain plugin
 #### Automatically obtain your public IPv4 or IPv6 address and resolve it to the corresponding domain name service.
 
-
 ## release note
+
+## 2026.3.12  luci-app-ddns-go 1.6.7
+ - 1.Fix Chinese update interval (seconds) display. 
+ - 2.Add IPK and APK installation packages for ddns go
+ - 3.Kernel updated to 6.16.2
 
 ## 2026.1.23  luci-app-ddns-go 1.6.5
  - 1.Fixed the issue of being unable to obtain the IPv6 prefix. 
