@@ -1,4 +1,4 @@
-name: Build ddns-go Packages
+name: Build Packages
 
 on:
   workflow_dispatch:
@@ -7,8 +7,29 @@ on:
       - v*
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
+    needs: get-version
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,8 +53,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Build packages
-        uses: sbwml/openwrt-gh-action-sdk@go1.26
+        uses: sirpdboy/gh-action-sdk@go1.26
         env:
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
@@ -55,12 +77,92 @@ jobs:
           else
             tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
           fi
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ needs.get-version.outputs.version }}"
+
+          echo "# 🚀 ddns-go: $VERSION" > release-notes.md
+          echo "" >> release-notes.md
+
+          echo "## 📦 Version Information" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- **ddns-go Version**: \`$VERSION\`" >> release-notes.md
+          echo "- **luci-app-ddns-go Package Version**: \`v1.6.7\`" >> release-notes.md
+          echo "- **Release Date**: \`$(date +%Y-%m-%d)\`" >> release-notes.md
+          echo "" >> release-notes.md
+
+          echo "## 🏗️ Supported Architectures" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "This release includes packages for the following architectures:" >> release-notes.md
+          echo "" >> release-notes.md
+          echo '```' >> release-notes.md
+          echo "aarch64_cortex-a53    # ARMv8 64-bit (Cortex-A53)" >> release-notes.md
+          echo "aarch64_cortex-a72    # ARMv8 64-bit (Cortex-A72)" >> release-notes.md
+          echo "aarch64_cortex-a76    # ARMv8 64-bit (Cortex-A76)" >> release-notes.md
+          echo "aarch64_generic       # ARMv8 64-bit (Generic)" >> release-notes.md
+          echo "arm_cortex-a7         # ARMv7 32-bit (Cortex-A7)" >> release-notes.md
+          echo "arm_cortex-a9         # ARMv7 32-bit (Cortex-A9)" >> release-notes.md
+          echo "mips_24kc             # MIPS 32-bit (24Kc)" >> release-notes.md
+          echo "mipsel_24kc           # MIPSEL 32-bit (24Kc)" >> release-notes.md
+          echo "riscv64_riscv64       # RISC-V 64-bit" >> release-notes.md
+          echo "x86_64                # x86-64 64-bit" >> release-notes.md
+          echo '```' >> release-notes.md
+          echo "" >> release-notes.md
+          
+          echo "## ✨ What's New" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "根据官方更新日志， $VERSION 包含以下更新：" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- 🔧 支持更多的DNS服务商" >> release-notes.md
+          echo "- 🚀 性能优化和改进" >> release-notes.md
+          echo "- 🐛 Bug修复和稳定性提升" >> release-notes.md
+          echo "- 🌐 Web界面优化" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## 📋 Changelog" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "### What's Changed in this release:" >> release-notes.md
+          echo "" >> release-notes.md
+
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            echo "Changes since $PREV_TAG:" >> release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD | grep -v "Merge" >> release-notes.md
+          else
+            git log --pretty=format:"- %s (%h)" -10 >> release-notes.md
+          fi
+          echo "" >> release-notes.md
+          echo "" >> release-notes.md
+
+          echo "## ⚠️ Notes" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- Make sure to select the correct architecture for your router" >> release-notes.md
+          echo "- If you're using a SNAPSHOT build, use the SNAPSHOT version packages" >> release-notes.md
+          echo "- For issues or feature requests, please open an issue on GitHub" >> release-notes.md
+          echo "" >> release-notes.md
+
+          echo "## 🙏  Credits" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- [jeessy2](https://github.com/jeessy2/ddns-go) - Original ddns-go project" >> release-notes.md
+          echo "- [sirpdboy](https://github.com/sirpdboy) - OpenWRT package maintainer" >> release-notes.md
+          echo "" >> release-notes.md
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat release-notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "=== Generated Release Notes ==="
+          cat release-notes.md
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
-          name: ${{ github.ref_name }}
+          name: ddns-go ${{ needs.get-version.outputs.version }}
+          tag: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           replacesArtifacts: true
           prerelease: false
           artifacts: "${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
+          body: ${{ steps.release_notes.outputs.notes }}
