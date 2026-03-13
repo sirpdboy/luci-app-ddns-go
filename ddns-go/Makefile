@@ -2,8 +2,6 @@
 #
 # Copyright (C) 2021-2026 sirpdboy  <herboy2008@gmail.com>
 # 
-# This is free software, licensed under the Apache License, Version 2.0 .
-#
 
 include $(TOPDIR)/rules.mk
 
@@ -22,47 +20,57 @@ PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
+PKG_USE_MIPS16:=0
 PKG_INSTALL:=1
 
+GO_ENV= \
+	CGO_ENABLED=0 \
+	GO111MODULE=on \
+	GOPROXY=https://goproxy.io,direct
 GO_PKG:=github.com/jeessy2/ddns-go/v6
 GO_PKG_LDFLAGS_X:=main.Version=$(PKG_VERSION)
-GO_PKG_LDFLAGS:=-X main.version=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
 
 define Package/ddns-go
-  SECTION:=net
-  CATEGORY:=Network
-  SUBMENU:=IP Addresses and Names
-  TITLE:=Support IPV4 and IPV6 simple and easy-to-use IP binding domain name tool
-  URL:=https://github.com/jeessy2/ddns-go
-  DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
-  USERID:=ddns-go:ddns-go
+	SECTION:=net
+	CATEGORY:=Network
+	SUBMENU:=IP Addresses and Names
+	TITLE:=Support IPV4 and IPV6 simple and easy-to-use IP binding domain name tool
+	URL:=https://github.com/jeessy2/ddns-go
+	DEPENDS:=$(GO_ARCH_DEPENDS) +ca-bundle
+	USERID:=ddns-go:ddns-go
 endef
 
 define Package/ddns-go/description
-  A simple and easy-to-use IP binding domain name tool that supports IPV4 and IPV6,
-  support Alidns Dnspod Cloudflare Hicloud Callback Baiducloud porkbun GoDaddy Google Domains.
+	A simple and easy-to-use IP binding domain name tool that supports IPV4 and IPV6.
 endef
 
 define Package/ddns-go/conffiles
-  /etc/config/ddns-go
-  /etc/ddns-go/ddns-go-config.yaml
+	/etc/config/ddns-go
+	/etc/ddns-go/ddns-go-config.yaml
 endef
 
+define Build/Compile
+	@echo "=== Starting ddns-go compilation for $(ARCH) ==="
+	(cd $(PKG_BUILD_DIR); \
+		$(GO_ENV) \
+		$(GO) build -v -o $(PKG_INSTALL_DIR)/bin/ddns-go \
+			-ldflags "-X main.version=$(PKG_VERSION)" \
+			github.com/jeessy2/ddns-go/v6 \
+	)
+	@echo "=== Compilation completed ==="
+endef
 
 define Package/ddns-go/install
-  $(call GoPackage/Package/Install/Bin,$(1))
-  $(INSTALL_DIR) $(1)/etc/init.d
-  $(INSTALL_DIR) $(1)/etc/config
-  $(INSTALL_DIR) $(1)/etc/ddns-go
-  if [ -f $(CURDIR)/files/ddns-go.init ]; then \
-    $(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go; \
-  fi
-  if [ -f $(CURDIR)/files/ddns-go.conf ]; then \
-    $(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go; \
-  fi
+	$(call GoPackage/Package/Install/Bin,$(1))	
+	$(INSTALL_DIR) $(1)/etc/init.d	
+	$(INSTALL_DIR) $(1)/etc/config	
+	$(INSTALL_DIR) $(1)/etc/ddns-go	
+	[ -f $(CURDIR)/files/ddns-go.init ] && $(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go || true	
+	[ -f $(CURDIR)/files/ddns-go.conf ] && $(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go || true	
 endef
+
 $(eval $(call GoBinPackage,ddns-go))
 $(eval $(call BuildPackage,ddns-go))
