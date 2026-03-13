@@ -22,9 +22,11 @@ PKG_MAINTAINER:=sirpdboy <herboy2008@gmail.com>
 PKG_BUILD_DEPENDS:=golang/host
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_FLAGS:=no-mips16
+PKG_INSTALL:=1
 
 GO_PKG:=github.com/jeessy2/ddns-go/v6
 GO_PKG_LDFLAGS_X:=main.Version=$(PKG_VERSION)
+GO_PKG_LDFLAGS:=-X main.version=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
@@ -49,13 +51,18 @@ define Package/ddns-go/conffiles
   /etc/ddns-go/ddns-go-config.yaml
 endef
 
+
 define Package/ddns-go/install
   $(call GoPackage/Package/Install/Bin,$(1))
   $(INSTALL_DIR) $(1)/etc/init.d
-  $(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go
-  $(INSTALL_DIR) $(1)/etc/config/
-  $(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go
+  $(INSTALL_DIR) $(1)/etc/config
+  $(INSTALL_DIR) $(1)/etc/ddns-go
+  if [ -f $(CURDIR)/files/ddns-go.init ]; then \
+    $(INSTALL_BIN) $(CURDIR)/files/ddns-go.init $(1)/etc/init.d/ddns-go; \
+  fi
+  if [ -f $(CURDIR)/files/ddns-go.conf ]; then \
+    $(INSTALL_CONF) $(CURDIR)/files/ddns-go.conf $(1)/etc/config/ddns-go; \
+  fi
 endef
-
 $(eval $(call GoBinPackage,ddns-go))
 $(eval $(call BuildPackage,ddns-go))
