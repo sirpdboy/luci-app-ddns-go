@@ -1,0 +1,320 @@
+name: test
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - v*
+
+env:
+  PACKAGE_DIRS: "homebox ookla-speedtest luci-app-netspeedtest"
+
+jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "dev")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+  scan-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.scan.outputs.packages }}
+      package-list: ${{ steps.scan.outputs.package-list }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Scan package directories
+        id: scan
+        run: |
+          PACKAGES_JSON="[]"
+          PACKAGE_LIST=""
+          
+          for dir in ${{ env.PACKAGE_DIRS }}; do
+            if [ -d "$dir" ] && [ -f "$dir/Makefile" ]; then
+              PKG_NAME=$(grep "^PKG_NAME" "$dir/Makefile" | head -1 | cut -d'=' -f2 | tr -d '[:space:]' || echo "")
+              PKG_VERSION=$(grep "^PKG_VERSION" "$dir/Makefile" | head -1 | cut -d'=' -f2 | tr -d '[:space:]' || echo "")
+              PKG_TITLE=$(grep "TITLE:=" "$dir/Makefile" | head -1 | cut -d':=' -f2 | sed 's/^[ \t]*//;s/[ \t]*$//' || echo "")
+              
+              if [ -z "$PKG_NAME" ]; then
+                PKG_NAME="$dir"
+              fi
+              
+              PACKAGES_JSON=$(echo "$PACKAGES_JSON" | jq -c \
+                --arg name "$PKG_NAME" \
+                --arg version "$PKG_VERSION" \
+                --arg dir "$dir" \
+                --arg title "$PKG_TITLE" \
+                '. + [{"name": $name, "version": $version, "dir": $dir, "title": $title}]')
+              
+              if [ -z "$PACKAGE_LIST" ]; then
+                PACKAGE_LIST="$PKG_NAME"
+              else
+                PACKAGE_LIST="$PACKAGE_LIST $PKG_NAME"
+              fi
+              
+              echo "Found package: $PKG_NAME (version: $PKG_VERSION) in $dir"
+            else
+              echo "Warning: $dir is not a valid package directory"
+            fi
+          done
+          
+          {
+            echo "packages<<EOF"
+            echo "$PACKAGES_JSON"
+            echo "EOF"
+            echo "package-list=$PACKAGE_LIST"
+          } >> $GITHUB_OUTPUT
+          
+          echo "Found packages: $PACKAGE_LIST"
+          echo "JSON output: $PACKAGES_JSON"
+
+  build:
+    name: Build ${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }}
+    needs: [get-version, scan-packages]
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: ${{ fromJson(needs.scan-packages.outputs.packages).*.name }}
+        arch:
+          - aarch64_cortex-a53
+          - aarch64_cortex-a72
+          - aarch64_cortex-a76
+          - aarch64_generic
+          - arm_cortex-a7
+          - arm_cortex-a9
+          - mips_24kc
+          - mipsel_24kc
+          - riscv64_riscv64
+          - x86_64
+        sdk:
+          - openwrt-24.10
+          - SNAPSHOT
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get package info
+        id: pkg_info
+        run: |
+          PACKAGES_JSON='${{ needs.scan-packages.outputs.packages }}'
+          PKG_NAME="${{ matrix.pkg }}"
+          
+          PKG_VERSION=$(echo "$PACKAGES_JSON" | jq -r --arg name "$PKG_NAME" '.[] | select(.name == $name) | .version')
+          PKG_DIR=$(echo "$PACKAGES_JSON" | jq -r --arg name "$PKG_NAME" '.[] | select(.name == $name) | .dir')
+          PKG_TITLE=$(echo "$PACKAGES_JSON" | jq -r --arg name "$PKG_NAME" '.[] | select(.name == $name) | .title')
+          
+          echo "pkg_dir=$PKG_DIR" >> $GITHUB_OUTPUT
+          echo "pkg_version=$PKG_VERSION" >> $GITHUB_OUTPUT
+          echo "pkg_title=$PKG_TITLE" >> $GITHUB_OUTPUT
+          echo "Building $PKG_NAME from $PKG_DIR"
+
+      - name: Prepare package feed
+        run: |
+          mkdir -p feed/${{ steps.pkg_info.outputs.pkg_dir }}
+          cp -r ${{ steps.pkg_info.outputs.pkg_dir }}/* feed/${{ steps.pkg_info.outputs.pkg_dir }}/
+          echo "=== Feed contents for ${{ matrix.pkg }} ==="
+          ls -la feed/${{ steps.pkg_info.outputs.pkg_dir }}/
+
+      - name: Build packages
+        uses: sirpdboy/gh-action-sdk@go1.26
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
+          FEEDNAME: packages_ci
+          PACKAGES: ${{ matrix.pkg }}
+          FEED_DIR: ${{ github.workspace }}/feed
+          NO_REFRESH_CHECK: true
+          MAKE_ARGS: V=s
+        continue-on-error: true
+
+      - name: Check build output
+        if: always()
+        run: |
+          echo "=== Build output for ${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }} ==="
+          if [ "${{ matrix.arch }}" = "riscv64_riscv64" ]; then
+            find bin/packages/riscv64_generic -type f -name "*.ipk" -o -name "*.apk" 2>/dev/null | grep -i "${{ matrix.pkg }}" || echo "No packages found for ${{ matrix.pkg }}"
+          else
+            find bin/packages/${{ matrix.arch }} -type f -name "*.ipk" -o -name "*.apk" 2>/dev/null | grep -i "${{ matrix.pkg }}" || echo "No packages found for ${{ matrix.pkg }}"
+          fi
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }}
+          path: |
+            bin/packages/${{ matrix.arch }}/packages_ci/*.apk
+            bin/packages/riscv64_generic/packages_ci/*.apk
+            bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+
+      - name: Create release archive
+        if: always()
+        run: |
+          if [ "${{ matrix.arch }}" = "riscv64_riscv64" ]; then
+            PKG_DIR="bin/packages/riscv64_generic/packages_ci"
+          else
+            PKG_DIR="bin/packages/${{ matrix.arch }}/packages_ci"
+          fi
+          
+          if [ -d "$PKG_DIR" ] && [ "$(ls -A $PKG_DIR 2>/dev/null | grep -i "${{ matrix.pkg }}")" ]; then
+            TEMP_DIR=$(mktemp -d)
+            find "$PKG_DIR" -type f -name "*${{ matrix.pkg }}*.ipk" -o -name "*${{ matrix.pkg }}*.apk" | while read file; do
+              cp "$file" "$TEMP_DIR/"
+            done
+            
+            if [ "$(ls -A $TEMP_DIR)" ]; then
+              tar -zcvf ${{ matrix.pkg }}-${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C $TEMP_DIR .
+              echo "✅ Archive created: ${{ matrix.pkg }}-${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
+            else
+              echo "⚠️ No packages found for ${{ matrix.pkg }} in $PKG_DIR"
+            fi
+            rm -rf "$TEMP_DIR"
+          else
+            echo "⚠️ No packages found in $PKG_DIR for ${{ matrix.pkg }}"
+          fi
+
+  release:
+    name: Create Release
+    needs: [get-version, scan-packages, build]
+    if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: "*-*-*-*"
+          merge-multiple: true
+
+      - name: Generate release notes
+        id: release_notes
+        env:
+          VERSION: ${{ needs.get-version.outputs.version }}
+          PACKAGE_LIST: ${{ needs.scan-packages.outputs.package-list }}
+        run: |
+          cat > release-notes.md << 'EOF'
+          # 🚀 OpenWRT Packages $VERSION
+
+          - [ OPENWRT 24.10 ] is an IPK package.
+          - [ SNAPSHOT ] is an APK package.
+
+          ## 📦 Package Overview
+          EOF
+          
+          echo "" >> release-notes.md
+          echo "| Package | Version | Description |" >> release-notes.md
+          echo "|---------|---------|-------------|" >> release-notes.md
+          
+          PACKAGES_JSON='${{ needs.scan-packages.outputs.packages }}'
+          echo "$PACKAGES_JSON" | jq -c '.[]' | while read -r pkg; do
+            PKG_NAME=$(echo "$pkg" | jq -r '.name')
+            PKG_VERSION=$(echo "$pkg" | jq -r '.version')
+            PKG_TITLE=$(echo "$pkg" | jq -r '.title')
+            echo "| \`$PKG_NAME\` | \`${PKG_VERSION:-$VERSION}\` | $PKG_TITLE |" >> release-notes.md
+          done
+          
+          echo "" >> release-notes.md
+          echo "## 📥 Downloads by Package" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
+            cd dist
+            
+            PACKAGES=$(ls *.tar.gz 2>/dev/null | cut -d'-' -f1 | sort -u)
+            
+            for pkg in $PACKAGES; do
+              echo "### $pkg" >> ../release-notes.md
+              echo "" >> ../release-notes.md
+              echo "| Architecture | SDK | Package | Size |" >> ../release-notes.md
+              echo "|--------------|-----|---------|------|" >> ../release-notes.md
+              
+              ls $pkg-*.tar.gz 2>/dev/null | while read file; do
+                sdk=$(echo "$file" | sed "s/^$pkg-//" | cut -d'-' -f1)
+                arch=$(echo "$file" | sed "s/^$pkg-$sdk-//" | sed 's/\.tar\.gz$//')
+                size=$(ls -lh "$file" | awk '{print $5}')
+                echo "| $arch | $sdk | [$file](https://github.com/${{ github.repository }}/releases/download/$VERSION/$file) | $size |" >> ../release-notes.md
+              done
+              echo "" >> ../release-notes.md
+            done
+            cd ..
+          else
+            echo "⚠️ No packages were successfully built." >> release-notes.md
+          fi
+          
+          echo "" >> release-notes.md
+          echo "## 📋 Changelog" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            echo "Changes since $PREV_TAG:" >> release-notes.md
+            echo "" >> release-notes.md
+            git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD | grep -v "Merge" >> release-notes.md
+          else
+            git log --pretty=format:"- %s (%h)" -10 >> release-notes.md
+          fi
+          
+          echo "" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## ⚠️ Notes" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- Make sure to select the correct architecture for your router" >> release-notes.md
+          echo "- If you're using a SNAPSHOT build, use the SNAPSHOT version packages" >> release-notes.md
+          echo "- For issues or feature requests, please open an issue on GitHub" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "## 🙏  Credits" >> release-notes.md
+          echo "" >> release-notes.md
+          echo "- [sirpdboy](https://github.com/sirpdboy) - OpenWRT luci-app-netspeedtest package maintainer" >> release-notes.md
+          echo "- [XGHeaven](https://github.com/XGHeaven/homebox) - Original homebox project" >> release-notes.md
+          echo "- [sbwml](https://github.com/sbwml/openwrt_pkgs/tree/main/speedtest-cli) - Original speedtest-cli project" >> release-notes.md
+          echo "- [sivel](https://github.com/sivel/speedtest-cli) - Original speedtest.py project" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          {
+            echo "notes<<EOF"
+            cat release-notes.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          
+          echo "=== Generated Release Notes ==="
+          cat release-notes.md
+          
+      - name: Upload to release
+        uses: ncipollo/release-action@v1
+        with:
+          name: OpenWRT Packages ${{ needs.get-version.outputs.version }}
+          tag: ${{ github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+          replacesArtifacts: true
+          prerelease: false
+          artifacts: "dist/*.tar.gz"
+          body: ${{ steps.release_notes.outputs.notes }}
