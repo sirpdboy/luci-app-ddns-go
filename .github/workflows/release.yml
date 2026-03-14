@@ -6,6 +6,8 @@ on:
     tags:
       - v*
 
+env:
+  PACKAGE_DIRS: "ddns-go luci-app-ddns-go"
 jobs:
   get-version:
     runs-on: ubuntu-latest
@@ -27,13 +29,72 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: $VERSION"
 
+  scan-packages:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.scan.outputs.packages }}
+      package-list: ${{ steps.scan.outputs.package-list }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Scan package directories
+        id: scan
+        run: |
+          PACKAGES_JSON="[]"
+          PACKAGE_LIST=""
+          
+          for dir in ${{ env.PACKAGE_DIRS }}; do
+            if [ -d "$dir" ] && [ -f "$dir/Makefile" ]; then
+              PKG_NAME=$(grep "^PKG_NAME" "$dir/Makefile" | head -1 | cut -d'=' -f2 | tr -d '[:space:]' || echo "")
+              PKG_VERSION=$(grep "^PKG_VERSION" "$dir/Makefile" | head -1 | cut -d'=' -f2 | tr -d '[:space:]' || echo "")
+              PKG_TITLE=$(grep "TITLE:=" "$dir/Makefile" | head -1 | cut -d':=' -f2 | sed 's/^[ \t]*//;s/[ \t]*$//' || echo "")
+              
+              if [ -z "$PKG_NAME" ]; then
+                PKG_NAME="$dir"
+              fi
+              
+              PACKAGES_JSON=$(echo "$PACKAGES_JSON" | jq -c \
+                --arg name "$PKG_NAME" \
+                --arg version "$PKG_VERSION" \
+                --arg dir "$dir" \
+                --arg title "$PKG_TITLE" \
+                '. + [{"name": $name, "version": $version, "dir": $dir, "title": $title}]')
+              
+              if [ -z "$PACKAGE_LIST" ]; then
+                PACKAGE_LIST="$PKG_NAME"
+              else
+                PACKAGE_LIST="$PACKAGE_LIST $PKG_NAME"
+              fi
+              
+              echo "Found package: $PKG_NAME (version: $PKG_VERSION) in $dir"
+            else
+              echo "Warning: $dir is not a valid package directory"
+            fi
+          done
+          
+          {
+            echo "packages<<EOF"
+            echo "$PACKAGES_JSON"
+            echo "EOF"
+            echo "package-list=$PACKAGE_LIST"
+          } >> $GITHUB_OUTPUT
+          
+          echo "Found packages: $PACKAGE_LIST"
+          echo "JSON output: $PACKAGES_JSON"
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
-    needs: get-version
+    needs: [get-version, scan-packages]
     runs-on: ubuntu-latest
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
+        pkg: ${{ fromJson(needs.scan-packages.outputs.packages).*.name }}
         arch:
           - aarch64_cortex-a53
           - aarch64_cortex-a72
@@ -80,19 +141,30 @@ jobs:
 
       - name: Generate release notes
         id: release_notes
+        env:
+          VERSION: ${{ needs.get-version.outputs.version }}
+          PACKAGE_LIST: ${{ needs.scan-packages.outputs.package-list }}
         run: |
-          VERSION="${{ needs.get-version.outputs.version }}"
+          cat > release-notes.md << 'EOF'
+          # 🚀 OpenWRT Packages ${{ needs.get-version.outputs.version }}
 
-          echo "# 🚀 ddns-go: $VERSION" > release-notes.md
-          echo "" >> release-notes.md
+          - [ OPENWRT 24.10 ] is an IPK package.
+          - [ SNAPSHOT ] is an APK package.
 
-          echo "## 📦 Version Information" >> release-notes.md
+          ## 📦 Package Overview
+          EOF
           echo "" >> release-notes.md
-          echo "- **ddns-go Version**: \`$VERSION\`" >> release-notes.md
-          echo "- **luci-app-ddns-go Package Version**: \`v1.6.7\`" >> release-notes.md
-          echo "- **OPENWRT 24.10 is an :**: \`IPK package\`" >> release-notes.md
-          echo "- **SNAPSHOT is an :**: \`APK package\`" >> release-notes.md
-          echo "- **Release Date**: \`$(date +%Y-%m-%d)\`" >> release-notes.md
+          echo "| Package | Version | Description |" >> release-notes.md
+          echo "|---------|---------|-------------|" >> release-notes.md
+          
+          PACKAGES_JSON='${{ needs.scan-packages.outputs.packages }}'
+          echo "$PACKAGES_JSON" | jq -c '.[]' | while read -r pkg; do
+            PKG_NAME=$(echo "$pkg" | jq -r '.name')
+            PKG_VERSION=$(echo "$pkg" | jq -r '.version')
+            PKG_TITLE=$(echo "$pkg" | jq -r '.title')
+            echo "| \`$PKG_NAME\` | \`${PKG_VERSION:-$VERSION}\` | $PKG_TITLE |" >> release-notes.md
+          done
+          
           echo "" >> release-notes.md
 
           echo "## 🏗️ Supported Architectures" >> release-notes.md
@@ -152,7 +224,7 @@ jobs:
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
-          name: ddns-go ${{ needs.get-version.outputs.version }}
+          name: OpenWRT Packages ${{ needs.get-version.outputs.version }}
           tag: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
