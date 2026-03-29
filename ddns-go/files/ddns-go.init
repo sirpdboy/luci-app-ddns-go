@@ -48,7 +48,7 @@ build_args() {
 
 start_instance() {
     local cfg="$1"
-    config_get_bool enabled "$cfg" enabled 1
+    config_get_bool enabled "$cfg" enabled 0
     [ "$enabled" -eq 0 ] && return 0
     
     config_get delay "$cfg" delay 0
