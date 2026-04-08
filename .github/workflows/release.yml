@@ -8,6 +8,7 @@ on:
 
 env:
   PACKAGE_DIRS: "ddns-go luci-app-ddns-go"
+  
 jobs:
   get-version:
     runs-on: ubuntu-latest
@@ -65,10 +66,10 @@ jobs:
                 --arg title "$PKG_TITLE" \
                 '. + [{"name": $name, "version": $version, "dir": $dir, "title": $title}]')
               
-              if [ -z "$PACKAGE_LIST" ]; then
+              if [ -z "$PKG_TITLE" ]; then
                 PACKAGE_LIST="$PKG_NAME"
               else
-                PACKAGE_LIST="$PACKAGE_LIST $PKG_NAME"
+                PACKAGE_LIST="$PKG_TITLE"
               fi
               
               echo "Found package: $PKG_NAME (version: $PKG_VERSION) in $dir"
@@ -86,6 +87,7 @@ jobs:
           
           echo "Found packages: $PACKAGE_LIST"
           echo "JSON output: $PACKAGES_JSON"
+
   build:
     name: Build ${{ matrix.arch }}-${{ matrix.sdk }}
     needs: [get-version, scan-packages]
@@ -108,7 +110,8 @@ jobs:
           - x86_64
         sdk:
           - openwrt-24.10
-          - SNAPSHOT
+          # 第一处修改：如果您不需要SNAPSHOT版本，可以删除下面这行
+          # - SNAPSHOT
 
     steps:
       - uses: actions/checkout@v4
@@ -118,26 +121,31 @@ jobs:
       - name: Build packages
         uses: sirpdboy/gh-action-sdk@go1.26
         env:
+          # 第二处修改：ARCH变量的定义
           ARCH: ${{ matrix.arch }}-${{ matrix.sdk }}
           FEEDNAME: packages_ci
-          PACKAGES: luci-app-ddns-go
+          PACKAGES: ${{ needs.scan-packages.outputs.package-list }}
           NO_REFRESH_CHECK: true
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arch }}-${{ matrix.sdk }}
+          # 第三处修改：修改artifact名称
+          name: ${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }}
+          # 第四处修改：修改上传路径
           path: |
-            bin/packages/${{ matrix.arch }}/packages_ci/*.apk
-            bin/packages/riscv64_generic/packages_ci/*.apk
             bin/packages/${{ matrix.arch }}/packages_ci/*.ipk
+            bin/packages/${{ matrix.arch }}/packages_ci/*.apk
+        if: success()
+
       - name: Create release archive
+        # 第五处修改：创建压缩包
         run: |
-          if [ "${{ matrix.arch }}" = "riscv64_riscv64" ] && [ "${{ matrix.sdk }}" = "SNAPSHOT" ]; then
-            tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/riscv64_generic/ packages_ci
-          else
-            tar -zcvf ${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz -C bin/packages/${{ matrix.arch }}/ packages_ci
-          fi
+          # 创建以架构和SDK命名的压缩包
+          tar -zcvf ${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }}.tar.gz \
+            -C bin/packages/${{ matrix.arch }}/ \
+            packages_ci/*.ipk packages_ci/*.apk
+        if: success()
 
       - name: Generate release notes
         id: release_notes
@@ -148,13 +156,13 @@ jobs:
           cat > release-notes.md << 'EOF'
           # 🚀 OpenWRT Packages ${{ needs.get-version.outputs.version }}
 
-          - [ OPENWRT 24.10 ] is an IPK package.
-          - [ SNAPSHOT ] is an APK package.
+          - [ OPENWRT 24.10 ] 是IPK格式的软件包。
+          - [ SNAPSHOT ] 是APK格式的软件包。
 
-          ## 📦 Package Overview
+          ## 📦 软件包概览
           EOF
           echo "" >> release-notes.md
-          echo "| Package | Version | Description |" >> release-notes.md
+          echo "| 软件包 | 版本 | 描述 |" >> release-notes.md
           echo "|---------|---------|-------------|" >> release-notes.md
           
           PACKAGES_JSON='${{ needs.scan-packages.outputs.packages }}'
@@ -166,10 +174,9 @@ jobs:
           done
           
           echo "" >> release-notes.md
-
-          echo "## 🏗️ Supported Architectures" >> release-notes.md
+          echo "## 🏗️ 支持的架构" >> release-notes.md
           echo "" >> release-notes.md
-          echo "This release includes packages for the following architectures:" >> release-notes.md
+          echo "本次发布包含以下架构的软件包：" >> release-notes.md
           echo "" >> release-notes.md
           echo '```' >> release-notes.md
           echo "aarch64_cortex-a53    # ARMv8 64-bit (Cortex-A53)" >> release-notes.md
@@ -184,16 +191,15 @@ jobs:
           echo "x86_64                # x86-64 64-bit" >> release-notes.md
           echo '```' >> release-notes.md
           echo "" >> release-notes.md
-          
           echo "" >> release-notes.md
-          echo "## 📋 Changelog" >> release-notes.md
+          echo "## 📋 更新日志" >> release-notes.md
           echo "" >> release-notes.md
-          echo "### What's Changed in this release:" >> release-notes.md
+          echo "### 本次发布的变更：" >> release-notes.md
           echo "" >> release-notes.md
 
           PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           if [ -n "$PREV_TAG" ]; then
-            echo "Changes since $PREV_TAG:" >> release-notes.md
+            echo "自 $PREV_TAG 以来的变更：" >> release-notes.md
             echo "" >> release-notes.md
             git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD | grep -v "Merge" >> release-notes.md
           else
@@ -202,25 +208,27 @@ jobs:
           echo "" >> release-notes.md
           echo "" >> release-notes.md
 
-          echo "## ⚠️ Notes" >> release-notes.md
+          echo "## ⚠️ 注意事项" >> release-notes.md
           echo "" >> release-notes.md
-          echo "- Make sure to select the correct architecture for your router" >> release-notes.md
-          echo "- If you're using a SNAPSHOT build, use the SNAPSHOT version packages" >> release-notes.md
-          echo "- For issues or feature requests, please open an issue on GitHub" >> release-notes.md
+          echo "- 请根据您的路由器架构选择正确的软件包" >> release-notes.md
+          echo "- 如果您使用的是开发版固件，请使用 SNAPSHOT 版本的软件包" >> release-notes.md
+          echo "- 如有问题或功能需求，请在 GitHub 上提交 Issue" >> release-notes.md
           echo "" >> release-notes.md
 
-          echo "## 🙏  Credits" >> release-notes.md
+          echo "## 🙏 鸣谢" >> release-notes.md
           echo "" >> release-notes.md
-          echo "- [jeessy2](https://github.com/jeessy2/ddns-go) - Original ddns-go project" >> release-notes.md
-          echo "- [sirpdboy](https://github.com/sirpdboy) - OpenWRT package maintainer" >> release-notes.md
+          echo "- [jeessy2](https://github.com/jeessy2/ddns-go) - ddns-go 原项目" >> release-notes.md
+          echo "- [sirpdboy](https://github.com/sirpdboy) - OpenWRT 软件包维护者" >> release-notes.md
           echo "" >> release-notes.md
 
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           cat release-notes.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          echo "=== Generated Release Notes ==="
+          echo "=== 生成的发布说明 ==="
           cat release-notes.md
+        if: success()
+
       - name: Upload to release
         uses: ncipollo/release-action@v1
         with:
@@ -230,5 +238,6 @@ jobs:
           allowUpdates: true
           replacesArtifacts: true
           prerelease: false
-          artifacts: "${{ matrix.sdk }}-${{ matrix.arch }}.tar.gz"
+          artifacts: "${{ matrix.pkg }}-${{ matrix.arch }}-${{ matrix.sdk }}.tar.gz"
           body: ${{ steps.release_notes.outputs.notes }}
+        if: success()
